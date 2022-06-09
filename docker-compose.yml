@@ -2,6 +2,14 @@
 version: '3.9'
 
 services:
+    mosquitto:
+        image: eclipse-mosquitto:latest
+        volumes:
+            - ./config/mosquitto:/mosquitto
+        ports:
+            - 1883:1883
+            - 9001:9001
+
     influxdb:
         image: influxdb:latest
         ports:
@@ -38,7 +46,7 @@ services:
             - '3000:3000'
         volumes:
             - grafana-storage:/var/lib/grafana
-            - ./grafana-provisioning/:/etc/grafana/provisioning
+            - ./config/grafana/provisioning/:/etc/grafana/provisioning
         networks:
             - internal
         depends_on:
