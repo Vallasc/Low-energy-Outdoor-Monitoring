@@ -5,10 +5,13 @@ services:
     mosquitto:
         image: eclipse-mosquitto:latest
         volumes:
-            - ./config/mosquitto:/mosquitto
+            - ./config/mosquitto:/mosquitto/config
+        networks:
+            - internal
         ports:
             - 1883:1883
             - 9001:9001
+        restart: always
 
     influxdb:
         image: influxdb:latest
