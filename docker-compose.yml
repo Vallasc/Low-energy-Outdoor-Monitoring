@@ -3,9 +3,10 @@ version: '3.9'
 
 services:
     mosquitto:
-        image: eclipse-mosquitto:latest
+        image: eclipse-mosquitto:2.0.14
         volumes:
             - ./config/mosquitto:/mosquitto/config
+            - mosquitto-storage:/mosquitto/data
         networks:
             - internal
         ports:
@@ -35,8 +36,6 @@ services:
             - chronograf-storage:/var/lib/chronograf
         networks:
             - internal
-        depends_on:
-            - influxdb
         environment:
             - INFLUXDB_URL=http://influxdb:8086
             - INFLUXDB_USERNAME=${INFLUXDB_USERNAME}
@@ -58,10 +57,12 @@ services:
             - GF_SECURITY_ADMIN_USER=${GRAFANA_USERNAME}
             - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
         restart: always
+
 volumes:
     influxdb-storage:
     chronograf-storage:
     grafana-storage:
+    mosquitto-storage:
 
 networks:
     internal:
