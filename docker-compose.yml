@@ -15,7 +15,7 @@ services:
         restart: always
 
     influxdb:
-        image: influxdb:latest
+        image: influxdb:2.2-alpine
         ports:
             - '8086:8086'
         volumes:
@@ -29,7 +29,7 @@ services:
         restart: always
         
     chronograf:
-        image: chronograf:latest
+        image: chronograf:1.9-alpine
         ports:
             - '127.0.0.1:8888:8888'
         volumes:
@@ -43,7 +43,7 @@ services:
         restart: always
 
     grafana:
-        image: grafana/grafana:latest
+        image: grafana/grafana:8.5.5
         ports:
             - '3000:3000'
         volumes:
@@ -58,11 +58,43 @@ services:
             - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
         restart: always
 
+    mongo:
+        image: mongo:5.0.9
+        restart: always
+        environment:
+            - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
+            - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+            - MONGO_INITDB_DATABASE=${MONGO_DB_NAME}
+        networks: 
+            - internal
+        volumes:
+            - mongodb-storage:/data/db
+        ports: 
+            - 27017:27017
+
+    mongo-express:
+        image: mongo-express:0.54.0
+        restart: always
+        ports:
+            - 8081:8081
+        environment:
+            - ME_CONFIG_MONGODB_ADMINUSERNAME=${MONGO_USERNAME}
+            - ME_CONFIG_MONGODB_ADMINPASSWORD=${MONGO_PASSWORD}
+            - ME_CONFIG_MONGODB_SERVER=mongo
+            - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+            - ME_CONFIG_BASICAUTH_USERNAME=${EXPRESS_USERNAME}
+            - ME_CONFIG_BASICAUTH_PASSWORD=${EXPRESS_PASSWORD}
+        networks: 
+            - internal
+        depends_on:
+            - mongo
+
 volumes:
     influxdb-storage:
     chronograf-storage:
     grafana-storage:
     mosquitto-storage:
+    mongodb-storage:
 
 networks:
     internal:
