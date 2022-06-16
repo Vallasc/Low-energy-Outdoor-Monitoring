@@ -15,7 +15,7 @@ services:
         restart: always
 
     influxdb:
-        image: influxdb:2.2-alpine
+        image: influxdb:1.8.10
         ports:
             - '8086:8086'
         volumes:
