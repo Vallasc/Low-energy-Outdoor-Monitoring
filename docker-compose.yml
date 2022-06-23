@@ -45,7 +45,7 @@ services:
     grafana:
         image: grafana/grafana:8.5.5
         ports:
-            - '3000:3000'
+            - '3333:3000'
         volumes:
             - grafana-storage:/var/lib/grafana
             - ./config/grafana/provisioning/:/etc/grafana/provisioning
