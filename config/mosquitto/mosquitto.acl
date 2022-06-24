@@ -1,0 +1,7 @@
+user admin
+topic readwrite #
+
+user device
+topic write temperature/
+topic write humidity/
+topic write gas/
