@@ -29,7 +29,6 @@
     }
   }
 
-  let prova = "prova"
 </script>
 
 <div class="form" in:fade={{ duration: 200 }}>
