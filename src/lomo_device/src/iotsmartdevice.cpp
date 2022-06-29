@@ -4,9 +4,14 @@
 void MessageProtocol::wifiConnect() {
     Serial.println();
     Serial.print("Connecting to ");
-    Serial.println(SSID);
+    open_preferences();
+    String ssid = preferences.getString(WIFI_SSID, "NONE");
+    String password = preferences.getString(WIFI_PASS, "NONE");
+    close_preferences();
 
-    WiFi.begin(SSID, PASSWORD);
+    Serial.println(ssid);
+    WiFi.begin(ssid.c_str(), password.c_str());
+    close_preferences();
 
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
