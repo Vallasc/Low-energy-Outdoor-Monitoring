@@ -1,11 +1,18 @@
-#include "mqttmanager.h"
+#include "mqtt_manager.h"
 
 void MQTTManager::connect()
 {
-    client->setServer(SERVER, 1883);
+    open_preferences();
+    String server = preferences.getString(HOST, "NONE");
+    int mqtt_port = preferences.getInt(MQTT_PORT, 1883);
+    String device_id = preferences.getString(DEVICE_ID, "NONE");
+    String token = preferences.getString(TOKEN, "NONE");
+    close_preferences();
+
+    client->setServer(server.c_str(), mqtt_port);
     while (!client->connected()) {
         Serial.print("Attempting MQTT connection...");
-        if (client->connect(DEVICE_ID, "admin", "admin")) {
+        if (client->connect(device_id.c_str(), device_id.c_str(), token.c_str())) {
             Serial.println("connected");
         } else {
             Serial.print("failed, rc=");
