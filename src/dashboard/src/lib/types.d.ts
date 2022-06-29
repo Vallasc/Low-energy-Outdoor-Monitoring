@@ -4,20 +4,28 @@ interface User {
     id?: string
     email: string
     password?: string
+    devices?: Array<Device>
 }
 
 interface Device {
     id: string
+    name: string,
     userId?: string
-    position: Position
-    connectionType: Connection
+    //position: Position
+    protocol: string
     sampleFrequency: number
     minGasValue: number
     maxGasValue: number
-    airQuality: number
-    averageDelay: number
-    packetDeliveryRatio: number
-    telegramUser: number
+    lastSeen?: number
+    proxyPort?: string
+    mqttPort?: string
+    host?: string
+    wifiSsid?: string
+    wifiPassword?: string
+    token?: string
+    //airQuality: number
+    //averageDelay: number
+    //packetDeliveryRatio: number
 }
 
 interface Position {
