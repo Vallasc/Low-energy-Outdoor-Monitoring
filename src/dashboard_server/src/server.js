@@ -32,7 +32,7 @@ app.use(cors())
 app.use(express.static(path.join(__dirname, './public')))
 
 //Initiate MongoDB and start server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   mongoose.connect(MONGODB_URI, { useNewUrlParser: true }).then((response) => {
     console.log(`Connected to MongoDB and server started on PORT ${PORT}`)
   }).catch((err) => {
@@ -95,7 +95,6 @@ app.get('/users/me', async (req, res) => {
   try {
     let user = await verifyToken(req)
     user.devices.forEach((device) => device.token = undefined)
-    console.log(user.devices)
     res.status(200).send({
       email : user.email,
       devices: user.devices
@@ -170,7 +169,7 @@ app.post('/devices', async (req, res) => {
     const id = new mongoose.Types.ObjectId().toString()
     const token = crypto.randomBytes(20).toString('hex')
     const device = {
-      id: new mongoose.Types.ObjectId().toString(),
+      id: id,
       userId: user._id,
       name: req.body.name,
       protocol: PROTOCOL,
