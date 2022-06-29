@@ -1,5 +1,8 @@
 import { jwtToken, toast } from "../stores"
-import type { User } from "./types"
+import type { User, Device } from "./types"
+
+const LOMO_HOST = "http://localhost:80"
+const DEVICE_HOST = "http://192.168.1.10:80"
 
 let token: string | null = null;
 jwtToken.subscribe(value => {
@@ -25,7 +28,7 @@ export function init() {
 export async function Fetch(path: string, method: string, body: any = null): Promise<Response> {
   console.log(path)
   if (token != null) {
-    let response = await fetch(path, {
+    const response = await fetch(path, {
       method: method,
       cache: 'no-cache',
       headers: {
@@ -45,7 +48,7 @@ export async function Fetch(path: string, method: string, body: any = null): Pro
 
 // Login
 export async function signin(user: User, remainSignin: boolean): Promise<boolean> {
-  const response = await fetch("/auth",
+  const response = await fetch(LOMO_HOST + "/auth",
     {
       method: 'POST',
       cache: 'no-cache',
@@ -69,7 +72,7 @@ export async function signin(user: User, remainSignin: boolean): Promise<boolean
 }
 
 export async function signup(user: User): Promise<boolean> {
-  const response = await fetch("/users",
+  const response = await fetch(LOMO_HOST + "/users",
     {
       method: 'POST',
       cache: 'no-cache',
@@ -98,7 +101,7 @@ export function signout(): void {
 
 export async function refreshToken(): Promise<any> {
   console.log("Refreshing token")
-  const response = await Fetch("/auth/refresh", "PUT")
+  const response = await Fetch(LOMO_HOST + "/auth/refresh", "PUT")
   if (response.status == 200) {
     let token: string = (await response.json()).token
     jwtToken.set(token);
@@ -110,52 +113,28 @@ export async function refreshToken(): Promise<any> {
 }
 
 export async function getUser(): Promise<User | null> {
-  const response = await Fetch("/users/me", "GET")
+  const response = await Fetch(LOMO_HOST + "/users/me", "GET")
   if (response.status == 200) {
     return await response.json()
   }
   return Promise.resolve(null)
 }
 
-export function signOut() {
-  localStorage.removeItem("jwtToken")
-  jwtToken.set(null)
+export async function pairDevice(deviceName: string): Promise<Device | null> {
+  const response = await Fetch(LOMO_HOST + "/devices", "POST", {name: deviceName})
+  if(response.status == 200)
+    return await response.json()
+  return Promise.resolve(null)
 }
 
-/*export async function updateUser(name: string, surname: string, email: string, password: string, 
-                    newPassword: string, newProntogramUsername: string) : Promise<User | null> {
-    const response = await Fetch(ACMESKY_HOST + "/users/me", "PUT", {
-        name: name,
-        surname: surname,
-        email: email,
-        password: password,
-        newPassword: newPassword,
-        newProntogramUsername: newProntogramUsername
-    })
-    if (response.status == 200) {
-        showToast("Profilo aggiornato", true)
-        return await response.json()
-    } else if (response.status == 400) {
-        showToast("Credenziali errate", true)
-        return Promise.resolve(null)
-    }
-    showToast("Errore interno"+ response.status, true)
-    return Promise.resolve(null)
+export async function initHost(deviceInit: Device): Promise<boolean> {
+  const response = await fetch(DEVICE_HOST + "/init", {
+    method: "POST",
+    cache: 'no-cache',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(deviceInit)
+  })
+  return response.status == 200
 }
-
-export async function deleteUser(email: string, password: string) : Promise<boolean> {
-    const response = await Fetch(ACMESKY_HOST + "/users/me", "DELETE", {
-        email: email,
-        password: password,
-    })
-    if (response.status == 200) {
-        showToast("Profilo eliminato", true)
-        signout()
-        return true
-    } else if (response.status == 400) {
-        showToast("Credenziali errate", true)
-        return false
-    }
-    showToast("Errore interno"+ response.status, true)
-    return false
-}*/
