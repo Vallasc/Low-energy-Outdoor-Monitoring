@@ -47,6 +47,7 @@ namespace
     Serial.println("- proxyPort: " + String( preferences.getInt(PROXY_PORT, -1)));
     Serial.println("- mqttPort: " + String(preferences.getInt(MQTT_PORT, -1)));
     Serial.println("- host: " + preferences.getString(HOST, "NONE"));
+    Serial.println("- token: " + preferences.getString(TOKEN, "NONE"));
     Serial.println("- wfiSsid: " + preferences.getString(WIFI_SSID, "NONE"));
     Serial.println("- wifiPassword: " + preferences.getString(WIFI_PASS, "NONE"));
     close_preferences();
