@@ -2,16 +2,23 @@
   import { location } from "../../stores"
   export let link: string = "/"
   export let indent: number = 0
+  export let hide: boolean = false
   let active: boolean
-  let alternativeActive: boolean
 
     $: {
       active = $location === link
     }
 </script>
 
-<li class="nav-item" style="margin-left:{indent*10}px">
-  <a class="nav-link" class:active class:alternativeActive  aria-current="page" href={link}>
+<li class="nav-item" class:hide style="margin-left:{indent*10}px">
+  <a class="nav-link" class:active  aria-current="page" href={link}>
     <slot></slot>
   </a>
 </li>
+
+
+<style>
+  .hide {
+    display: none;
+  }
+</style>
