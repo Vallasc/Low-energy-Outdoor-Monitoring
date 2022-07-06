@@ -4,7 +4,7 @@
 #include <DHT.h>
 #include <PubSubClient.h> 
 #include <WiFi.h>
-#include "protocol_manager.h"
+//#include "protocol_manager.h"
 #include "config.h"
 #include "state.h"
 
@@ -12,8 +12,9 @@
 
 #define HUM "/hum"
 #define TEMP "/temp"
+#define AQI "/aqi"
 
-class MQTTManager : ProtocolManager{
+class MQTTManager {
     public:
         PubSubClient* client;
 
@@ -29,6 +30,7 @@ class MQTTManager : ProtocolManager{
         bool is_connected();
         void publish_temperature(float value);
         void publish_humidity(float value);
+        void publish_aqi(float value);
 
     private:
         void publish(String topic, String value);
