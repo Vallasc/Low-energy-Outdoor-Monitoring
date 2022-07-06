@@ -3,6 +3,7 @@
 #include <DHT.h>
 
 #include "mqtt_manager.h"
+#include "sensors.h"
 #include "init.h"
 #include "config.h"
 #include "state.h"
@@ -34,6 +35,19 @@ void wifi_connect()
 int sampleFrequency = 10;
 
 void setup() {
+  Serial.begin(9600);
+  Sensors sensors;
+  while(true) {
+    Serial.println("Temp: " + String(sensors.get_temperature()));
+    Serial.println("Hum: " + String(sensors.get_humidity()));
+    Serial.println("Soil: " + String(sensors.get_soil()));
+    Serial.println("Gas: " + String(sensors.get_gas()));
+    Serial.println();
+    delay(1000);
+  }
+}
+
+void _setup() {
   delay(2000);
   Serial.begin(9600);
   Serial.println("LOMO v1.0");
@@ -68,7 +82,7 @@ void setup() {
   // digitalWrite(22, HIGH);
 
   print_config();
-  DHT dht(DHTPIN, DHTTYPE);
+  DHT dht(DHT_PIN, DHT_TYPE);
   WiFiClient wifiClient;
   MQTTManager mqtt_mng(wifiClient);
 
