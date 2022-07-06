@@ -1,0 +1,176 @@
+#include <Arduino.h>
+#include <Esp.h>
+#include <DHT.h>
+#include "http_manager.h"
+#include "mqtt_manager.h"
+#include "init.h"
+#include "config.h"
+#include "state.h"
+
+
+String sensorReadings;
+
+String serverName = "http://192.168.1.171:80/update-sensor";
+
+
+DHT dht(DHT_PIN, DHT_TYPE);
+WiFiClient wifiClient;
+MQTTManager* mqtt_mng;
+// MQTTManager mqtt_mng(wifiClient);
+HTTPManager http_mng(wifiClient);
+float v[5];
+int i = -1;
+int aqi = 2;
+float somma = 0.0;
+float media = 0.0;
+
+int pos = 5;
+
+  
+
+void wifi_connect()
+{
+  open_preferences();
+  String ssid = preferences.getString(WIFI_SSID, "TIM_Hub_4G_415B");//Vodafone-C02090047-TIM_Hub_4G_5G_415B
+  String password = preferences.getString(WIFI_PASS, "FMA22DY14MM");//ERxFJfcyc3rtpY3H-FMA22DY14MM
+  close_preferences();
+  
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+
+  WiFi.begin(ssid.c_str(), password.c_str());
+
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.print("WiFi connected.");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+}
+
+
+
+void setup() {
+  delay(2000);
+  Serial.begin(9600);
+  Serial.println("LOMO v1.0");
+
+  // open_preferences();
+  // preferences.clear();
+  // close_preferences();
+
+  /*open_preferences();
+  preferences.clear();
+  preferences.putBool(DEVICE_CONFIGURED, false);
+  bool device_configured = preferences.getBool(DEVICE_CONFIGURED, false);
+  //String protocol = preferences.getString(PROTOCOL_TYPE, "HTTP");
+  sampleFrequency = preferences.getInt(SAMPLE_FREQUENCY, 1);
+  close_preferences();*/
+
+  /*if(!device_configured)
+  {
+    Serial.println("Waiting for initialization...");
+    InitAPWebServer init_tasks;
+    init_tasks.init();
+    while(!init_tasks.is_inited()){
+      Serial.println("2");
+      init_tasks.handle_client();
+      delay(500);
+    }
+    Serial.println("Device configured");
+    print_config();
+    delay(2000);
+    ESP.restart();
+  }*/
+
+  // pinMode(21, OUTPUT);
+  // digitalWrite(21, HIGH);
+  
+  // pinMode(22, OUTPUT);
+  // digitalWrite(22, HIGH);
+
+  //print_config();
+  
+
+  dht.begin();
+  wifi_connect();
+
+  MQTTManager* mqtt_mng = new MQTTManager(wifiClient);
+}
+
+void loop() {
+  Serial.println("CIAO");
+  open_preferences();
+  int sampleFrequency = preferences.getInt(SAMPLE_FREQUENCY, 1);
+  float min= preferences.getFloat(MIN_GAS_VALUE, 40.00);
+  float max= preferences.getFloat(MIN_GAS_VALUE, 72.00);
+  close_preferences();
+  float hum = dht.readHumidity();
+  float temp = dht.readTemperature();
+  Serial.println(hum);
+  Serial.println(temp);
+
+//   if (i < pos)
+//   {
+//     Serial.println("Valore i");
+//     Serial.println(i);
+//     i++;
+   
+
+//     v[i] = hum;
+//     somma=somma+v[i];
+//     Serial.println("Valore v[i]:");
+//     Serial.println(v[i]);
+//     if(v[4] != 0.0){
+
+//       media=somma/(i+1);
+//       Serial.println("Media:");
+//       Serial.println(media);
+
+//       if(media >= max)
+//         aqi = 0;
+//       if(min <= media && media < max)
+//         aqi = 1;
+//       else
+//         aqi = 2;
+
+//       Serial.println("AQI:");
+//       Serial.println(aqi);
+//       i = -1;
+//   }
+//  }
+
+
+  if(PROTOCOL_TYPE =="MQTT"){
+
+    if (!mqtt_mng->is_connected())
+    {
+      //mqtt_mng.connect();
+    }
+
+    //MQTT
+
+    // mqtt_mng.publish_temperature(temp);
+    // mqtt_mng.publish_humidity(hum);
+    // mqtt_mng.publish_aqi(aqi);
+    Serial.println("mqtt");
+  }
+  if(PROTOCOL_TYPE =="HTTP"){
+    //HTTP
+    Serial.println("OAIC");
+    //http_mng.publish(temp,hum);
+    http_mng.httpPOSTRequest(serverName.c_str(),temp,hum,aqi);
+    //Serial.println("CASO");
+    Serial.println(sensorReadings);
+  }
+
+
+  Serial.println("Media:");
+	Serial.println(media);
+
+  delay(sampleFrequency * 1000);
+}

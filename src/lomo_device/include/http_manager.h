@@ -4,19 +4,19 @@
 
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
-#include "protocol_manager.h"
+//#include "protocol_manager.h"
 #include "config.h"
 #include "state.h"
 
 
-class HTTPManager : ProtocolManager{
+class HTTPManager{
     public:
         HTTPClient* client;
         HTTPManager(WiFiClient wifiClient){
             client = new HTTPClient();
-            open_preferences();
-            client->begin(wifiClient, "http://"+ preferences.getString(HOST, "NONE") + "/reading");
-            close_preferences();
+            /*open_preferences();
+            client->begin(wifiClient, "http://"+ preferences.getString(HOST, "192.168.1.3") + "/reading");
+            close_preferences();*/
         }
 
         ~HTTPManager(){
@@ -25,7 +25,7 @@ class HTTPManager : ProtocolManager{
 
         void publish(float temp, float hum);
 
-
+   void httpPOSTRequest(const char* serverName, float temp, float hum, int aqi);
 };
 
 

@@ -33,6 +33,11 @@ void MQTTManager::publish_humidity(float value)
     publish(HUM, String(value));
 }
 
+void MQTTManager::publish_aqi(float value)
+{
+    publish(AQI, String(value));
+}
+
 void MQTTManager::publish(String topic, String value) 
 {
     client->publish((char * ) topic.c_str(), (char * ) value.c_str());
