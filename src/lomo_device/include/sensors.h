@@ -28,7 +28,12 @@ class Sensors {
     float get_humidity();
     // Wet %
     float get_soil();
-
+    
+    // MQ135 	10～1000ppm( ammonia gas, toluene, Hydrogen, smoke)
+    // Atmospheric CO2 Level:  400ppm
+    // Average indoor CO2:     350-450ppm
+    // Maximum acceptable CO2: 1000ppm
+    // Dangerous CO2 levels:   2000ppm
     float get_gas();
   private:
     DHT* dht;
