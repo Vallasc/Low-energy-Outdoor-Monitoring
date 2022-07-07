@@ -67,6 +67,18 @@ void InitAPWebServer::handle_post_init()
       pref->putInt(KEY_MQTT_PORT, mqttPort);
     }
     if(obj.containsKey(JSON_HOST)){
+      // TODO
+      // #include <Dns.h>
+
+      // DNSClient dnClient;
+
+      //   dnClient.begin(Ethernet.dnsServerIP());
+        
+      //   if(dnClient.getHostByName("pool.ntp.org",timeServer) == 1) {
+      //     Serial.print(F("ntp = "));
+      //     Serial.println(timeServer);
+      //   }
+      //   else Serial.print(F("dns lookup failed"));
       String host = obj[JSON_HOST];
       pref->putString(KEY_HOST, host);
     }
