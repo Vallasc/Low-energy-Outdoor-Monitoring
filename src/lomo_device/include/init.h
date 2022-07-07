@@ -1,10 +1,10 @@
 #ifndef INIT_H
 #define INIT_H
 
-#include <WiFi.h>
 #include <WebServer.h>
 #include <ArduinoJson.h>
 #include "state.h"
+#include "wifi_utils.h"
 
 #define JSON_ID "id"
 #define JSON_NAME "name"
