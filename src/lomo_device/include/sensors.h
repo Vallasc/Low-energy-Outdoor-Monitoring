@@ -4,6 +4,9 @@
 #include <DHT.h>
 #include "config.h"
 
+#define SOIL_LOW 3000
+#define SOIL_HIGH 1100
+
 class Sensors {
   public:
     Sensors()
@@ -19,11 +22,14 @@ class Sensors {
       delete(dht);
     }
 
+    // Temperature Celsius
     float get_temperature();
+    // Humidity %
     float get_humidity();
+    // Wet %
     float get_soil();
-    float get_gas();
 
+    float get_gas();
   private:
     DHT* dht;
 };
