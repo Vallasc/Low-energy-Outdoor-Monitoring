@@ -1,16 +1,26 @@
 #include <Arduino.h>
 #include <DHT.h>
 #include <Esp.h>
+#include <WiFiUdp.h>
+#include <WiFiClient.h>
 
+#include "protocol_manager.h"
 #include "mqtt_manager.h"
+#include "coap_manager.h"
 #include "init.h"
 #include "sensors.h"
 #include "config.h"
 #include "state.h"
 #include "wifi_utils.h"
 
-WiFiClient wifiClient;
+#include <coap-simple.h>
+WiFiClient wifi_client;
+WiFiUDP wifi_udp_client;
+
+CoAPManager* coap_mng;
 MQTTManager* mqtt_mng;
+
+// TODO free resources
 Sensors* sensors;
 
 void setup() {
@@ -27,7 +37,8 @@ void setup() {
     Serial.println("Waiting for initialization...");
     InitAPWebServer init_tasks;
     init_tasks.init();
-    while(!init_tasks.is_inited()){
+    while(!init_tasks.is_inited())
+    {
       init_tasks.handle_client();
       delay(500);
     }
@@ -42,19 +53,33 @@ void setup() {
   if( !wifi_connect(WIFI_SSID.c_str(), WIFI_PASS.c_str()) )
     ESP.restart();
 
-  mqtt_mng = new MQTTManager(&wifiClient, HOST.c_str(), MQTT_PORT, DEVICE_ID.c_str(), TOKEN.c_str());
-  if( !mqtt_mng->connect() )
-    ESP.restart();
+  if(PROTOCOL_TYPE == "MQTT")
+  {
+    mqtt_mng = new MQTTManager(&wifi_client, HOST.c_str(), MQTT_PORT, DEVICE_ID.c_str(), TOKEN.c_str());
+    if( !((MQTTManager*)mqtt_mng)->begin() )
+      ESP.restart();
+  }
+  else
+  {
+    coap_mng = new CoAPManager(&wifi_udp_client, HOST.c_str(), MQTT_PORT, TOKEN.c_str());
+    coap_mng->begin();
+  }
 
   sensors = new Sensors();
 }
 
 void loop() {
   Serial.println("CIAO");
-  //mqtt_mng->publish("hum", "39");
-  mqtt_mng->publish_temperature(sensors->get_temperature());
-  mqtt_mng->publish_humidity(sensors->get_humidity());
-  Serial.println(sensors->get_soil());
-  Serial.println(sensors->get_gas());
+
+  float temp = sensors->get_temperature();
+  float hum = sensors->get_humidity();
+  float soil = sensors->get_soil();
+  float aqi = sensors->get_gas();
+
+  if(PROTOCOL_TYPE == "MQTT")
+    mqtt_mng->publish_sensors(temp, hum, soil, aqi);
+  else
+    coap_mng->publish_sensors(temp, hum, soil, aqi);
+
   delay(SAMPLE_FREQUENCY * 1000);
 }
