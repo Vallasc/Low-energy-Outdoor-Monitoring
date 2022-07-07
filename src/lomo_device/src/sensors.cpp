@@ -20,5 +20,6 @@ float Sensors::get_soil()
 
 float Sensors::get_gas()
 {
+  // TODO
   return analogRead(GAS_PIN);
 }
