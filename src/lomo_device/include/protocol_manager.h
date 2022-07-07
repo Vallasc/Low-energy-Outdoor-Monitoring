@@ -3,10 +3,10 @@
 
 class ProtocolManager {
   public:
-    void publish_temperature(float value);
-    void publish_humidity(float value);
-    void publish_soil(float value);
-    void publish_aqi(float value);
+    void publish_sensors(float temp, float hum, float soil, float aqi) {}
+    bool begin() {
+      return true;
+    }
 };
 
 #endif
