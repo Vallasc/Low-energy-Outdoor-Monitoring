@@ -14,32 +14,35 @@
 #define SOIL "soil"
 #define AQI "aqi"
 
-class MQTTManager : ProtocolManager {
+class MQTTManager : public ProtocolManager {
     public:
         PubSubClient* client;
 
-        MQTTManager(WiFiClient* wifiClient, const char* host, int port, const char* device_id, const char* token){
+        MQTTManager(WiFiClient* wifiClient, const char* _host, int port, const char* _device_id, const char* _token){
             client = new PubSubClient(*wifiClient);
+            strcpy(host, _host);
             client->setServer(host, port);
-            this->device_id = device_id;
-            this->token = token;
+            strcpy(device_id, _device_id);
+            strcpy(token, _token);
         }
  
         ~MQTTManager(){
              delete(client);
         }
 
-        bool connect();
+        bool begin();
         bool is_connected();
 
         void publish_temperature(float value);
         void publish_humidity(float value);
         void publish_soil(float value);
         void publish_aqi(float value);
-        void publish(String topic, String value);
+        void publish(const char* topic, const char* value);
+        void publish_sensors(float temp, float hum, float soil, float aqi);
     private:
-        const char* device_id;
-        const char* token;
+        char host[32];
+        char device_id[64];
+        char token[64];
         const int max_mqtt_retries = 50;
         
 };
