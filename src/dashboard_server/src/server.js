@@ -18,7 +18,7 @@ const app = express()
 const TOKEN_SECRET = process.env.TOKEN_SECRET || "lomolomo"
 const USER = process.env.USER || "admin"
 const PASS = process.env.PASS || "admin"
-const PORT = process.env.PORT || 80
+const PORT = process.env.PORT || 9091
 
 const DB_NAME = process.env.DB_NAME || "lomo"
 const HOST_NAME = process.env.HOST_NAME || "localhost"
