@@ -20,32 +20,12 @@
 			"rolename":	"admin",
 			"acls":	[{
 					"acltype":	"publishClientSend",
-					"topic":	"$CONTROL/dynamic-security/#",
-					"priority":	0,
-					"allow":	true
-				}, {
-					"acltype":	"publishClientReceive",
-					"topic":	"$CONTROL/dynamic-security/#",
-					"priority":	0,
-					"allow":	true
-				}, {
-					"acltype":	"publishClientReceive",
-					"topic":	"$SYS/#",
+					"topic":	"#",
 					"priority":	0,
 					"allow":	true
 				}, {
 					"acltype":	"publishClientReceive",
 					"topic":	"#",
-					"priority":	0,
-					"allow":	true
-				}, {
-					"acltype":	"subscribePattern",
-					"topic":	"$CONTROL/dynamic-security/#",
-					"priority":	0,
-					"allow":	true
-				}, {
-					"acltype":	"subscribePattern",
-					"topic":	"$SYS/#",
 					"priority":	0,
 					"allow":	true
 				}, {
