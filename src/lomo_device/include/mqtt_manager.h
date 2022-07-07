@@ -4,36 +4,43 @@
 #include <DHT.h>
 #include <PubSubClient.h> 
 #include <WiFi.h>
-//#include "protocol_manager.h"
+#include "protocol_manager.h"
 #include "config.h"
-#include "state.h"
 
-#define VALUE "CIAO"
+// /devies/foo/temp
+#define MAIN_MQTT_TOPIC "devices"
+#define HUM "hum"
+#define TEMP "temp"
+#define SOIL "soil"
+#define AQI "aqi"
 
-#define HUM "/hum"
-#define TEMP "/temp"
-#define AQI "/aqi"
-
-class MQTTManager {
+class MQTTManager : ProtocolManager {
     public:
         PubSubClient* client;
 
-        MQTTManager(WiFiClient wifiClient){
-            client = new PubSubClient(wifiClient);
+        MQTTManager(WiFiClient* wifiClient, const char* host, int port, const char* device_id, const char* token){
+            client = new PubSubClient(*wifiClient);
+            client->setServer(host, port);
+            this->device_id = device_id;
+            this->token = token;
         }
-
+ 
         ~MQTTManager(){
-            delete(client);
+             delete(client);
         }
 
-        void connect();
+        bool connect();
         bool is_connected();
+
         void publish_temperature(float value);
         void publish_humidity(float value);
+        void publish_soil(float value);
         void publish_aqi(float value);
-
-    private:
         void publish(String topic, String value);
+    private:
+        const char* device_id;
+        const char* token;
+        const int max_mqtt_retries = 50;
         
 };
 

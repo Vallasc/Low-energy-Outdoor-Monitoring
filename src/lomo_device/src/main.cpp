@@ -1,66 +1,28 @@
 #include <Arduino.h>
-#include <Esp.h>
 #include <DHT.h>
+#include <Esp.h>
 
 #include "mqtt_manager.h"
-#include "sensors.h"
 #include "init.h"
+#include "sensors.h"
 #include "config.h"
 #include "state.h"
+#include "wifi_utils.h"
 
-void wifi_connect()
-{
-  open_preferences();
-  String ssid = preferences.getString(WIFI_SSID, "NONE");
-  String password = preferences.getString(WIFI_PASS, "NONE");
-  close_preferences();
-  
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-
-  WiFi.begin(ssid.c_str(), password.c_str());
-
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("");
-  Serial.print("WiFi connected.");
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-}
-
-int sampleFrequency = 10;
+WiFiClient wifiClient;
+MQTTManager* mqtt_mng;
+Sensors* sensors;
 
 void setup() {
-  Serial.begin(9600);
-  Sensors sensors;
-  while(true) {
-    Serial.println("Temp: " + String(sensors.get_temperature()));
-    Serial.println("Hum: " + String(sensors.get_humidity()));
-    Serial.println("Soil: " + String(sensors.get_soil()));
-    Serial.println("Gas: " + String(sensors.get_gas()));
-    Serial.println();
-    delay(1000);
-  }
-}
-
-void _setup() {
   delay(2000);
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("LOMO v1.0");
 
-  open_preferences();
   //preferences.clear();
-  //preferences.putBool(DEVICE_CONFIGURED, false);
-  bool device_configured = preferences.getBool(DEVICE_CONFIGURED, false);
-  String protocol = preferences.getString(PROTOCOL_TYPE, "");
-  sampleFrequency = preferences.getInt(SAMPLE_FREQUENCY, 1);
-  close_preferences();
+  load_debug_config();
+  load_config();
 
-  if(!device_configured)
+  if(!DEVICE_CONFIGURED)
   {
     Serial.println("Waiting for initialization...");
     InitAPWebServer init_tasks;
@@ -75,32 +37,24 @@ void _setup() {
     ESP.restart();
   }
 
-  // pinMode(21, OUTPUT);
-  // digitalWrite(21, HIGH);
-  
-  // pinMode(22, OUTPUT);
-  // digitalWrite(22, HIGH);
-
   print_config();
-  DHT dht(DHT_PIN, DHT_TYPE);
-  WiFiClient wifiClient;
-  MQTTManager mqtt_mng(wifiClient);
 
-  dht.begin();
-  wifi_connect();
+  if( !wifi_connect(WIFI_SSID.c_str(), WIFI_PASS.c_str()) )
+    ESP.restart();
 
-  if (!mqtt_mng.is_connected())
-  {
-    mqtt_mng.connect();
-  }
+  mqtt_mng = new MQTTManager(&wifiClient, HOST.c_str(), MQTT_PORT, DEVICE_ID.c_str(), TOKEN.c_str());
+  if( !mqtt_mng->connect() )
+    ESP.restart();
 
-  float hum = dht.readHumidity();
-  float temp = dht.readTemperature();
-  mqtt_mng.publish_temperature(temp);
-  mqtt_mng.publish_humidity(hum);
+  sensors = new Sensors();
 }
 
 void loop() {
   Serial.println("CIAO");
-  delay(sampleFrequency * 1000);
+  //mqtt_mng->publish("hum", "39");
+  mqtt_mng->publish_temperature(sensors->get_temperature());
+  mqtt_mng->publish_humidity(sensors->get_humidity());
+  Serial.println(sensors->get_soil());
+  Serial.println(sensors->get_gas());
+  delay(SAMPLE_FREQUENCY * 1000);
 }
