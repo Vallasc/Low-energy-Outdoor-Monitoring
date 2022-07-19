@@ -23,7 +23,11 @@ MQTTManager* mqtt_mng;
 // TODO free resources
 Sensors* sensors;
 
+
+
 void setup() {
+  pinMode(25,OUTPUT);
+  digitalWrite(25,HIGH);
   delay(2000);
   Serial.begin(115200);
   Serial.println("LOMO v1.0");
@@ -61,11 +65,11 @@ void setup() {
   }
   else
   {
-    coap_mng = new CoAPManager(&wifi_udp_client, HOST.c_str(), MQTT_PORT, TOKEN.c_str());
+    coap_mng = new CoAPManager(&wifi_udp_client, HOST.c_str(), 5683, TOKEN.c_str());
     coap_mng->begin();
   }
 
-  sensors = new Sensors();
+  sensors = new Sensors(MIN_GAS_VALUE, MAX_GAS_VALUE);
 }
 
 void loop() {
@@ -74,12 +78,15 @@ void loop() {
   float temp = sensors->get_temperature();
   float hum = sensors->get_humidity();
   float soil = sensors->get_soil();
-  float aqi = sensors->get_gas();
-
+  float gas = sensors->get_gas();
+  int aqi = sensors->get_aqi();
+ 
   if(PROTOCOL_TYPE == "MQTT")
-    mqtt_mng->publish_sensors(temp, hum, soil, aqi);
+    
+    mqtt_mng->publish_sensors(temp, hum, soil, gas, aqi);
   else
-    coap_mng->publish_sensors(temp, hum, soil, aqi);
+    coap_mng->publish_sensors(temp, hum, soil, gas, aqi);
 
+  
   delay(SAMPLE_FREQUENCY * 1000);
 }

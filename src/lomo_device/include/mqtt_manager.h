@@ -13,6 +13,8 @@
 #define TEMP "temp"
 #define SOIL "soil"
 #define AQI "aqi"
+#define GAS "gas"
+#define OUT "outdoor"
 
 class MQTTManager : public ProtocolManager {
     public:
@@ -36,9 +38,11 @@ class MQTTManager : public ProtocolManager {
         void publish_temperature(float value);
         void publish_humidity(float value);
         void publish_soil(float value);
-        void publish_aqi(float value);
+        void publish_aqi(int value);
+        void publish_gas(float value);
+        void publish_outdoor(float value);
         void publish(const char* topic, const char* value);
-        void publish_sensors(float temp, float hum, float soil, float aqi);
+        void publish_sensors(float temp, float hum, float soil, float gas, int aqi);
     private:
         char host[32];
         char device_id[64];

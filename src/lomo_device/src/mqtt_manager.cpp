@@ -39,10 +39,10 @@ void MQTTManager::publish_humidity(float value)
   publish(HUM, buff);
 }
 
-void MQTTManager::publish_aqi(float value)
+void MQTTManager::publish_aqi(int value)
 {
   char buff[8];
-  snprintf(buff, sizeof(buff), "%.2f", value);
+  snprintf(buff, sizeof(buff), "%d", value);
   publish(AQI, buff);
 }
 
@@ -53,6 +53,13 @@ void MQTTManager::publish_soil(float value)
   publish(SOIL, buff);
 }
 
+void MQTTManager::publish_gas(float value)
+{
+  char buff[8];
+  snprintf(buff, sizeof(buff), "%.2f", value);
+  publish(GAS, buff);
+}
+
 void MQTTManager::publish(const char* topic, const char* value)
 {
   char full_topic[256];
@@ -61,13 +68,15 @@ void MQTTManager::publish(const char* topic, const char* value)
   client->publish(full_topic, value);
 }
 
-void MQTTManager::publish_sensors(float temp, float hum, float soil, float aqi)
+void MQTTManager::publish_sensors(float temp, float hum, float soil, float gas, int aqi)
 {
   Serial.println("Publish sensors MQTT");
   publish_temperature(temp);
   publish_humidity(hum);
   publish_soil(soil);
+  publish_gas(gas);
   publish_aqi(aqi);
+  
 }
 
 bool MQTTManager::is_connected()

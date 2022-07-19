@@ -30,7 +30,7 @@ class CoAPManager : public ProtocolManager {
       client->start();
       return true;
     }
-    void publish_sensors(float temp, float hum, float soil, float aqi);
+    void publish_sensors(float temp, float hum, float soil,float gas, int aqi);
     void get_config();
     void callback_response_config(CoapPacket &packet, IPAddress ip, int port);
 
