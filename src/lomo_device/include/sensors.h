@@ -7,6 +7,8 @@
 #define SOIL_LOW 3000
 #define SOIL_HIGH 1100
 
+#define GAS_LOW 0
+#define GAS_HIGH 2000
 
 class Sensors {
   public:
@@ -29,6 +31,9 @@ class Sensors {
       delete(dht);
     }
 
+    void begin();
+    void start();
+    void stop();
     // Temperature Celsius
     float get_temperature();
     // Humidity %
@@ -37,14 +42,7 @@ class Sensors {
     float get_soil();
     //AQI
     float get_gas();
-
     int get_aqi();
-
-    // MQ135 	10～1000ppm( ammonia gas, toluene, Hydrogen, smoke)
-    // Atmospheric CO2 Level:  400ppm
-    // Average indoor CO2:     350-450ppm
-    // Maximum acceptable CO2: 1000ppm
-    // Dangerous CO2 levels:   2000ppm
     
   private:
     DHT* dht;

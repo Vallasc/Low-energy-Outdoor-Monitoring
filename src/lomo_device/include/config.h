@@ -7,5 +7,6 @@
 #define GAS_PIN 35
 #define SOIL_PIN 34
 #define BUTTON_PIN 22
+#define ENABLE_SENSORS_PIN 25
 
 #endif
