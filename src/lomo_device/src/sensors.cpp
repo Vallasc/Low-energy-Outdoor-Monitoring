@@ -1,5 +1,23 @@
 #include "sensors.h"
-#include "state.h"
+
+void Sensors::begin(){
+  pinMode(ENABLE_SENSORS_PIN, OUTPUT);
+  Serial.println("Sensors enabled");
+  pinMode(GAS_PIN, INPUT);
+  pinMode(SOIL_PIN, INPUT);
+  dht = new DHT(DHT_PIN, DHT_TYPE);
+  start();
+}
+
+void Sensors::start(){
+  dht->begin();
+  digitalWrite(ENABLE_SENSORS_PIN, HIGH);
+  delay(5000);
+}
+
+void Sensors::stop(){
+  digitalWrite(ENABLE_SENSORS_PIN, LOW);
+}
 
 float Sensors::get_temperature()
 {
@@ -21,47 +39,43 @@ float Sensors::get_soil()
 
 float Sensors::get_gas()
 {
-  // TODO
-  // int v1;
-  // Serial.println("GAS:");
-  // v1 = rand() % 100;
-  // Serial.println(v1);
-  
-  return analogRead(GAS_PIN);
-  //return v1;
+  float reading = analogRead(GAS_PIN);
+  reading = reading < GAS_LOW ? GAS_LOW : reading;
+  reading = reading > GAS_HIGH ? GAS_HIGH : reading;
+  return map(reading, GAS_LOW, GAS_HIGH, 0, 100);
 }
 
 
 int Sensors::get_aqi(){    
-  Serial.println("Valore i");
-  Serial.println(aqi_index);
+  // Serial.println("Value i");
+  // Serial.println(aqi_index);
 
   v[aqi_index] = get_gas();
   
-  Serial.println("Valore v[i]:");
-  Serial.println(v[aqi_index]);
+  // Serial.println("Value v[i]:");
+  // Serial.println(v[aqi_index]);
 
   aqi_index = (aqi_index + 1) % 5;
 
   if(v[4] == -1.0)
     return aqi;
 
-  int somma = v[0] + v[1]+ v[2] + v[3] + v[4];
-  Serial.println("Somma:");
-  Serial.println(somma);
-  int media = somma/(5);
-  Serial.println("Media:");
-  Serial.println(media);
+  int sum = v[0] + v[1]+ v[2] + v[3] + v[4];
+  // Serial.println("Sum:");
+  // Serial.println(sum);
+  int avg = sum/(5);
+  // Serial.println("Mean:");
+  // Serial.println(media);
 
-  if(media >= max_gas_value)
+  if(avg >= max_gas_value)
     aqi = 0;
-  if(min_gas_value <= media && media < max_gas_value)
+  if(min_gas_value <= avg && avg < max_gas_value)
     aqi = 1;
   else
     aqi = 2;
 
-  Serial.println("AQI:");
-  Serial.println(aqi);
+  // Serial.println("AQI:");
+  // Serial.println(aqi);
 
  return aqi;
  }

@@ -21,13 +21,11 @@ CoAPManager* coap_mng;
 MQTTManager* mqtt_mng;
 
 // TODO free resources
+// TODo add gps coordinates
 Sensors* sensors;
 
 
-
 void setup() {
-  pinMode(25,OUTPUT);
-  digitalWrite(25,HIGH);
   delay(2000);
   Serial.begin(115200);
   Serial.println("LOMO v1.0");
@@ -70,23 +68,24 @@ void setup() {
   }
 
   sensors = new Sensors(MIN_GAS_VALUE, MAX_GAS_VALUE);
+  sensors->begin();
 }
 
 void loop() {
   Serial.println("CIAO");
 
+  sensors->start();
   float temp = sensors->get_temperature();
   float hum = sensors->get_humidity();
   float soil = sensors->get_soil();
   float gas = sensors->get_gas();
   int aqi = sensors->get_aqi();
- 
+  sensors->stop();
+
   if(PROTOCOL_TYPE == "MQTT")
-    
     mqtt_mng->publish_sensors(temp, hum, soil, gas, aqi);
   else
     coap_mng->publish_sensors(temp, hum, soil, gas, aqi);
-
   
   delay(SAMPLE_FREQUENCY * 1000);
 }
