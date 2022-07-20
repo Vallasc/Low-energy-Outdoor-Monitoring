@@ -1,40 +1,23 @@
 import axios from 'axios'
 
-const GRAFANA_URL = process.env.GRAFANA_URL || 1883
-const GRAFANA_PORT = process.env.GRAFANA_PORT || 1883
+const GRAFANA_URL = process.env.GRAFANA_URL || "127.0.0.1"
+const GRAFANA_PORT = process.env.GRAFANA_PORT || 3333
+const GRAFANA_USER = process.env.GRAFANA_USER || "admin"
+const GRAFANA_PASS = process.env.GRAFANA_PASS || "admin"
 
-grafana_url = "ip172-18-0-23-c8vdq1g9jotg00duhte0-3000.direct.labs.play-with-docker.com"
-username = "admin"
-password = "admin"
+const baseUrl = `http://${GRAFANA_USER}:${GRAFANA_PASS}@${GRAFANA_URL}:${GRAFANA_PORT}/api/admin/users`
 
-axios
-  .post('https://whatever.com/todos', {
-    todo: 'Buy the milk',
-  })
-  .then(res => {
-    console.log(`statusCode: ${res.status}`);
-    console.log(res);
-  })
-  .catch(error => {
-    console.error(error);
-  });
-
-import requests
-import json
-
-
-base_url = "http://{}:{}@{}".format(username, password, grafana_url)
-
-data = {
-  "name":"User1",
-  "email":"user1@graf.com",
-  "login":"user1",
-  "password":"userpassword",
-  "OrgId": 1
-
+export async function createUser(email, username, password) {
+    try{
+        const res = axios.post(baseUrl, {
+        name : username,
+        email: email,
+        login: username,
+        password: password,
+        OrgId: 1
+        })
+        return res.status == 200
+    }catch(e){
+        return false
+    }
 }
-
-
-resp = requests.post(base_url + "/api/admin/users", json=data, verify=False)
-data = resp.json()
-data
