@@ -1,10 +1,13 @@
-import {MIN_GAS_VALUE, 
-  MAX_GAS_VALUE, 
-  SAMPLE_FREQUENCY, 
+import {
+  MIN_GAS_VALUE,
+  MAX_GAS_VALUE,
+  SAMPLE_FREQUENCY,
   PROTOCOL,
   PROXY_PORT,
+  CONFIG_UPDATE_FREQUENCY,
   MQTT_PORT } from './deviceConfig.js'
 import {createClient } from './mosquitto.js'
+import {createUser } from './grafana.js'
 
 import express from 'express'
 import path from 'path'
@@ -72,15 +75,16 @@ app.post('/users', async (req, res) => {
     .update(req.body.password + salt)
     .digest('hex')
   try {
-    const doc = await User.create({
-      _id: req.body.email,
-      email: req.body.email,
-      password: hash,
-      salt: salt,
-      devices: []
-    })
-    //console.log(doc)
-    res.status(201).send()
+      const doc = await User.create({
+        _id: req.body.email,
+        email: req.body.email,
+        password: hash,
+        salt: salt,
+        devices: []
+      })
+      //console.log(doc)
+      createUser(req.body.email, req.body.email, req.body.password)
+      res.status(201).send()
   } catch (err) {
     //console.log(err)
     if (err && err.code && err.code === 11000)
@@ -174,15 +178,19 @@ app.post('/devices', async (req, res) => {
       name: req.body.name,
       protocol: PROTOCOL,
       sampleFrequency: SAMPLE_FREQUENCY,
+      configUpdateFrequency: CONFIG_UPDATE_FREQUENCY,
       minGasValue: MIN_GAS_VALUE,
       maxGasValue: MAX_GAS_VALUE,
+      lastSeen: -1,
       proxyPort: PROXY_PORT,
       mqttPort: MQTT_PORT,
-      token: token
+      token: token,
+      latitude: req.body.latitude,
+      longitude: req.body.longitude
     }
     user.devices.push(device)
     user.save()
-    createClient(id, token)
+    createUser()
     res.status(200).send(device)
   } catch (err) {
     console.error(err)
@@ -204,6 +212,7 @@ app.put('/devices/:id', async (req, res) => {
             "devices.$.sampleFrequency": req.body.sampleFrequency,
             "devices.$.minGasValue": req.body.minGasValue,
             "devices.$.maxGasValue": req.body.maxGasValue
+            // TODO Add gps
         }
       }
     )
