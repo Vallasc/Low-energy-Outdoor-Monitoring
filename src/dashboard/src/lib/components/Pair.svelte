@@ -1,5 +1,6 @@
 <script lang="ts">
   import Steps from "./Steps.svelte"
+  import Map from "./Map.svelte"
   import { showToast, initHost, pairDevice } from "../logic"
   import type { Device } from "../types"
 
@@ -8,7 +9,10 @@
   let name = ""
   let ssid = ""
   let password = ""
+  let latitude = 0
+  let longitude = 0
 
+  let address = ""
   let deviceInit: Device
   let timeout
   const RETRY_MSEC = 2000
@@ -19,6 +23,9 @@
     name = ""
     ssid = ""
     password = ""
+    latitude = 0
+    longitude = 0
+    address = ""
   }
 
   async function next() {
@@ -46,6 +53,8 @@
     deviceInit.wifiSsid = ssid
     deviceInit.wifiPassword = password
     deviceInit.host = window.location.hostname
+    deviceInit.latitude = -1
+    deviceInit.longitude = -1
     console.log(deviceInit)
     try{
       let res = await initHost(deviceInit)
@@ -65,6 +74,18 @@
   $: {
     if(!show){
       clear()
+    }
+  }
+
+  async function fetchLatLong(address: string){
+    clearTimeout(timeout)
+    let result = await fetch("https://nominatim.openstreetmap.org/search?q="+ encodeURIComponent(address) +"&format=json&polygon=1&addressdetails=1")
+    let json = await result.json()
+    if(json.length > 0){
+      let first = json[0]
+      console.log(first)
+      longitude = parseFloat(first.lon)
+      latitude = parseFloat(first.lat)
     }
   }
 </script>
@@ -116,7 +137,29 @@
               required
             />
           </div>
-          <div class="mb-3">MAPPA</div>
+          <div class="mb-3">
+            <label for="_" class="form-label">Device coordinates</label>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Insert address or select on map"
+              style="margin-bottom: 5px;"
+              bind:value={address}
+              on:input={() => {
+                clearTimeout(timeout)
+                timeout = setTimeout(()=>{
+                  fetchLatLong(address)
+                }, 1000)
+              }}
+            />
+            <Map
+              bind:latitude = {latitude}
+              bind:longitude = {longitude}
+              autodetectPosition = {true}
+              selectPosition = {true}
+              isVisible = {show}
+            ></Map>
+          </div>
         </div>
       {:else if state == 1}
         <div class="modal-body">
