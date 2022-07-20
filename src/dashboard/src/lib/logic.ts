@@ -1,7 +1,8 @@
 import { jwtToken, toast } from "../stores"
 import type { User, Device } from "./types"
 
-const LOMO_HOST = "http://localhost:80"
+// const LOMO_HOST = "http://localhost:80"
+const LOMO_HOST = "http://localhost:9091"
 const DEVICE_HOST = "http://192.168.1.10:80"
 
 let token: string | null = null;

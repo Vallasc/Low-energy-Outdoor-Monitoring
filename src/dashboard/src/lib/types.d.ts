@@ -14,6 +14,7 @@ interface Device {
     //position: Position
     protocol: string
     sampleFrequency: number
+    configUpdateFrequency: number
     minGasValue: number
     maxGasValue: number
     lastSeen?: number
@@ -23,22 +24,6 @@ interface Device {
     wifiSsid?: string
     wifiPassword?: string
     token?: string
-    //airQuality: number
-    //averageDelay: number
-    //packetDeliveryRatio: number
-}
-
-interface Position {
     latitude: number
     longitude: number
-}
-
-interface Protocol {
-    isMQTT: boolean
-    isHTTP: boolean
-}
-
-interface Connection {
-    isWIFI: boolean
-    isSIM: boolean
 }

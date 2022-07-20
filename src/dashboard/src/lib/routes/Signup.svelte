@@ -60,6 +60,8 @@
         type="password"
         class="form-control"
         placeholder="Repeat your password"
+        minlength="4"
+        maxlength="20"
         required
       />
     </div>
