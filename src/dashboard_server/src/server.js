@@ -83,7 +83,11 @@ app.post('/users', async (req, res) => {
         devices: []
       })
       //console.log(doc)
-      createUser(req.body.email, req.body.email, req.body.password)
+      try{
+        createUser(req.body.email, req.body.email, req.body.password)
+      } catch (err) {
+        console.error(err)
+      }
       res.status(201).send()
   } catch (err) {
     //console.log(err)
@@ -190,7 +194,7 @@ app.post('/devices', async (req, res) => {
     }
     user.devices.push(device)
     user.save()
-    createUser()
+    createClient(id, token)
     res.status(200).send(device)
   } catch (err) {
     console.error(err)
