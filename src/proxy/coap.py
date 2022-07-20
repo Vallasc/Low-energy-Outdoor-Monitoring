@@ -70,6 +70,6 @@ class CoapProxy:
             else:
                 raise
         #asyncio.Task(aiocoap.Context.create_server_context(root, bind=('0.0.0.0', 5683))) # not working on Windows
-        asyncio.Task(aiocoap.Context.create_server_context(root, bind=('192.168.1.229', 5683)))
+        asyncio.Task(aiocoap.Context.create_server_context(root, bind=('192.168.1.102', 5683)))
 
         loop.run_forever()
