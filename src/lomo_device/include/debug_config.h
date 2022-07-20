@@ -14,5 +14,7 @@
 #define DEBUG_SAMPLE_FREQUENCY 5
 #define DEBUG_WIFI_SSID "NONE" 
 #define DEBUG_WIFI_PASS "NONE"
+#define DEBUG_LAT -1 
+#define DEBUG_LONG -1
 
 #endif

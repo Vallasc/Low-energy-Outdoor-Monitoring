@@ -60,6 +60,20 @@ void MQTTManager::publish_gas(float value)
   publish(GAS, buff);
 }
 
+void MQTTManager::publish_rssi(int value)
+{
+  char buff[8];
+  snprintf(buff, sizeof(buff), "%d", value);
+  publish(WIFI_RSSI, buff);
+}
+
+void MQTTManager::publish_lat_long(double lat, double lon)
+{
+  char buff[32];
+  snprintf(buff, sizeof(buff), "%lf,%lf", lat, lon);
+  publish(LAT_LONG, buff);
+}
+
 void MQTTManager::publish(const char* topic, const char* value)
 {
   char full_topic[256];
@@ -68,7 +82,7 @@ void MQTTManager::publish(const char* topic, const char* value)
   client->publish(full_topic, value);
 }
 
-void MQTTManager::publish_sensors(float temp, float hum, float soil, float gas, int aqi)
+void MQTTManager::publish_sensors(float temp, float hum, float soil, float gas, int aqi, int wifi_rssi)
 {
   Serial.println("Publish sensors MQTT");
   publish_temperature(temp);
@@ -76,7 +90,8 @@ void MQTTManager::publish_sensors(float temp, float hum, float soil, float gas, 
   publish_soil(soil);
   publish_gas(gas);
   publish_aqi(aqi);
-  
+  publish_rssi(wifi_rssi);
+  publish_lat_long(latitude, longitude);
 }
 
 bool MQTTManager::is_connected()

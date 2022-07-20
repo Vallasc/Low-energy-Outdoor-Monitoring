@@ -30,7 +30,12 @@ class CoAPManager : public ProtocolManager {
       client->start();
       return true;
     }
-    void publish_sensors(float temp, float hum, float soil,float gas, int aqi);
+
+    void set_lat_long(double lat, double lon){
+      this->latitude = lat;
+      this->longitude = lon;
+    }
+    void publish_sensors(float temp, float hum, float soil, float gas, int aqi, int wifi_rssi);
     void get_config();
     void callback_response_config(CoapPacket &packet, IPAddress ip, int port);
 
@@ -39,6 +44,8 @@ class CoAPManager : public ProtocolManager {
     int port;
     char token[64];
     IPAddress address;
+    double latitude;
+    double longitude;
 };
 
 #endif

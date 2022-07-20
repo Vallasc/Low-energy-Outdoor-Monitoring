@@ -21,7 +21,6 @@ CoAPManager* coap_mng;
 MQTTManager* mqtt_mng;
 
 // TODO free resources
-// TODo add gps coordinates
 Sensors* sensors;
 
 
@@ -82,10 +81,13 @@ void loop() {
   int aqi = sensors->get_aqi();
   sensors->stop();
 
+  int rssi = get_wifi_strength(3);
+
+  // ADD lat long
   if(PROTOCOL_TYPE == "MQTT")
-    mqtt_mng->publish_sensors(temp, hum, soil, gas, aqi);
+    mqtt_mng->publish_sensors(temp, hum, soil, gas, aqi, rssi);
   else
-    coap_mng->publish_sensors(temp, hum, soil, gas, aqi);
+    coap_mng->publish_sensors(temp, hum, soil, gas, aqi, rssi);
   
   delay(SAMPLE_FREQUENCY * 1000);
 }

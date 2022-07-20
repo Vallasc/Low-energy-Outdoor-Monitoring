@@ -17,6 +17,8 @@
 #define KEY_SAMPLE_FREQUENCY "S_FREQ" // Int sec
 #define KEY_WIFI_SSID "W_SSID" // String
 #define KEY_WIFI_PASS "W_PASS" // String
+#define KEY_LAT "LAT" // double
+#define KEY_LONG "LONG" // double
 
 #define PREF_NAME "LOMO"
 
@@ -35,6 +37,8 @@ namespace
   int SAMPLE_FREQUENCY;
   String WIFI_SSID;
   String WIFI_PASS;
+  double LAT;
+  double LONG;
   Preferences preferences;
 
   static Preferences* open_preferences()
@@ -64,6 +68,8 @@ namespace
     Serial.println("- token: " + TOKEN);
     Serial.println("- wfiSsid: " + WIFI_SSID);
     Serial.println("- wifiPassword: " + WIFI_PASS);
+    Serial.println("- latitude: " + String(LAT));
+    Serial.println("- longitude: " + String(LONG));
   }
 
   static void load_config()
@@ -82,6 +88,8 @@ namespace
     TOKEN = preferences.getString(KEY_TOKEN, "NONE");
     WIFI_SSID = preferences.getString(KEY_WIFI_SSID, "NONE");
     WIFI_PASS = preferences.getString(KEY_WIFI_PASS, "NONE");
+    LAT = preferences.getDouble(KEY_LAT, -1);
+    LONG = preferences.getDouble(KEY_LONG, -1);
     close_preferences();
   }
 
@@ -102,6 +110,8 @@ namespace
     preferences.putString(KEY_TOKEN, DEBUG_TOKEN);
     preferences.putString(KEY_WIFI_SSID, DEBUG_WIFI_SSID);
     preferences.putString(KEY_WIFI_PASS, DEBUG_WIFI_PASS);
+    preferences.putDouble(KEY_LAT, DEBUG_LAT);
+    preferences.putDouble(KEY_LONG, DEBUG_LONG);
     close_preferences();
   }
 }
