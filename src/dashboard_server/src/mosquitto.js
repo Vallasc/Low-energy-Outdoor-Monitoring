@@ -2,12 +2,12 @@ import mqtt from 'mqtt'
 
 const MQTT_USER = process.env.MQTT_USER || "admin"
 const MQTT_PASS = process.env.MQTT_PASS || "admin"
-const MQTT_URI = process.env.MQTT_URI || "mqtt://localhost"
+const MQTT_URI = process.env.MQTT_URI || "mqtt://127.0.0.1"
 
 const client  = mqtt.connect(MQTT_URI, {username: MQTT_USER, password: MQTT_PASS})
 
 client.on("connect",function(){	
-  console.log("connected  "+ client.connected);
+  console.log("MQTT broker connected "+ client.connected);
 })
 
 export function createClient(username, password) {
@@ -21,7 +21,8 @@ export function createClient(username, password) {
       }
     ]
   }
-  client.publish("$CONTROL/dynamic-security/v1", JSON.stringify(command))
+  client.publish("$CONTROL/dynamic-security/v1", JSON.stringify(command), console.log)
+  console.log("MQTT client created " + username)
 }
 
 export function deleteClient(username) {

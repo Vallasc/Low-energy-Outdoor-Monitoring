@@ -5,7 +5,7 @@ bool MQTTManager::begin()
   int i = this->max_mqtt_retries;
   while (!client->connected() && i-- > 0)
   {
-    Serial.print("Connecting to MQTT broker ");
+    Serial.println("Connecting to MQTT broker ");
     if (client->connect(device_id, device_id, token))
     {
       Serial.println("connected");
@@ -13,7 +13,7 @@ bool MQTTManager::begin()
     else
     {
       Serial.print("failed, rc=");
-      Serial.print(client->state());
+      Serial.println(client->state());
       delay(5000);
     }
   }

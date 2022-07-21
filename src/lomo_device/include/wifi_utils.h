@@ -47,6 +47,7 @@ namespace
       Serial.println("AP Config Failed");
       return false;
     }
+    WiFi.softAP("LOMO_DEVICE", NULL);
     IPAddress IP = WiFi.softAPIP();
     Serial.println("Static IP: " + AP_LOCAL_IP.toString());
     Serial.println("Gateway IP: " + AP_GATEWAY_IP.toString());

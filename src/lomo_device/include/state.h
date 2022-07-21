@@ -114,6 +114,15 @@ namespace
     preferences.putDouble(KEY_LONG, DEBUG_LONG);
     close_preferences();
   }
+
+
+  static void reset_pref()
+  {
+    open_preferences();
+    preferences.clear();
+    preferences.putBool(KEY_DEVICE_CONFIGURED, false);
+    close_preferences();
+  }
 }
 
 #endif

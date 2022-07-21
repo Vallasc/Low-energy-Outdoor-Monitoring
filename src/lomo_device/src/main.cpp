@@ -23,14 +23,19 @@ MQTTManager* mqtt_mng;
 // TODO free resources
 Sensors* sensors;
 
+void IRAM_ATTR isr() {
+  Serial.println("RESETTING DEVICE");
+  reset_pref();
+  ESP.restart();
+}
 
 void setup() {
   delay(2000);
   Serial.begin(115200);
   Serial.println("LOMO v1.0");
 
-  //preferences.clear();
-  load_debug_config();
+  if(ENABLE_DEBUG)
+    load_debug_config();
   load_config();
 
   if(!DEVICE_CONFIGURED)
@@ -48,8 +53,10 @@ void setup() {
     delay(2000);
     ESP.restart();
   }
-
   print_config();
+
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+	attachInterrupt(BUTTON_PIN, isr, FALLING);
 
   if( !wifi_connect(WIFI_SSID.c_str(), WIFI_PASS.c_str()) )
     ESP.restart();
