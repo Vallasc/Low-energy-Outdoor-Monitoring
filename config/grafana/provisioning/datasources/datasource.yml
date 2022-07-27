@@ -3,9 +3,13 @@ datasources:
   - name: InfluxDB
     type: influxdb
     access: proxy
-    database: db0
-    user: admin
-    password: admin
     url: http://influxdb:8086
     isDefault: true
-    editable: true
+    editable: false
+    secureJsonData:
+      token: adminadminadmin
+    jsonData:
+      version: Flux
+      organization: lomo
+      defaultBucket: lomo
+      tlsSkipVerify: true
