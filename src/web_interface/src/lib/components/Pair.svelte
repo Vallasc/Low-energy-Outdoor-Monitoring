@@ -38,7 +38,7 @@
       return;
     }
     try {
-      deviceInit = await pairDevice(name)
+      deviceInit = await pairDevice(name, latitude, longitude)
       console.log(deviceInit)
       state = 1
       await initDevice()
@@ -53,8 +53,8 @@
     deviceInit.wifiSsid = ssid
     deviceInit.wifiPassword = password
     deviceInit.host = window.location.hostname
-    deviceInit.latitude = -1
-    deviceInit.longitude = -1
+    deviceInit.latitude = latitude
+    deviceInit.longitude = longitude
     console.log(deviceInit)
     try{
       let res = await initHost(deviceInit)

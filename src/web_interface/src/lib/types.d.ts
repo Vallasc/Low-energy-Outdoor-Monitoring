@@ -11,15 +11,14 @@ interface Device {
     id: string
     name: string,
     userId?: string
-    //position: Position
     protocol: string
     sampleFrequency: number
     configUpdateFrequency: number
     minGasValue: number
     maxGasValue: number
     lastSeen?: number
-    proxyPort?: string
-    mqttPort?: string
+    proxyPort?: number
+    mqttPort?: number
     host?: string
     wifiSsid?: string
     wifiPassword?: string
