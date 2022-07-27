@@ -2,10 +2,10 @@
 version: '3.9'
 
 services:
+
     mosquitto:
-        image: eclipse-mosquitto:2.0.14
+        build: ./config/mosquitto
         volumes:
-            - ./config/mosquitto:/mosquitto/config
             - mosquitto-storage:/mosquitto/data
         networks:
             - internal
@@ -29,10 +29,16 @@ services:
             - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUXDB_USERNAME}
             - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_PASSWORD}
             - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_ADMIN_TOKEN}
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:8086/ping"]
+            interval: 30s
+            timeout: 10s
+            retries: 5
+            start_period: 40s
         restart: always
 
     grafana:
-        image: grafana/grafana:8.5.5
+        image: grafana/grafana:9.0.4
         ports:
             - '3333:3000'
         volumes:
@@ -45,6 +51,14 @@ services:
         environment:
             - GF_SECURITY_ADMIN_USER=${GRAFANA_USERNAME}
             - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+            - GF_AUTH_ANONYMOUS_ENABLED=true
+
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+            interval: 30s
+            timeout: 10s
+            retries: 5
+            start_period: 40s
         restart: always
 
     mongo:
@@ -78,6 +92,65 @@ services:
         depends_on:
             - mongo
 
+    proxy:
+        build: ./src/proxy
+        ports:
+            - "8082:8082"
+            - "9090:9090/udp"
+        environment:
+            - INFLUX_HOST=influxdb
+            - INFLUXDB_PORT=8086
+            - INFLUXDB_ORG=${INFLUXDB_ORG}
+            - INFLUXDB_BUCKET=${INFLUXDB_BUCKET}
+            - INFLUX_TOKEN=${INFLUXDB_ADMIN_TOKEN}
+            - MQTT_USERNAME=${MOSQUITTO_USERNAME}
+            - MQTT_PASSWORD=${MOSQUITTO_PASSWORD}
+            - MQTT_HOST=mosquitto
+            - MQTT_PORT=1883
+            - MONGO_USERNAME=${MONGO_USERNAME}
+            - MONGO_PASSWORD=${MONGO_PASSWORD}
+            - MONGO_DB_NAME=${MONGO_DB_NAME}
+            - MONGO_HOST=mongo
+            - MONGO_PORT=27017
+        restart: always
+        networks: 
+            - internal
+        depends_on:
+            - mongo
+            - influxdb
+            - mosquitto
+
+    lomoapi:
+        build: ./src/api_server
+        ports:
+            - "8888:8888"
+        environment:
+            - GRAFANA_HOST=grafana
+            - GRAFANA_PORT=3000
+            - GRAFANA_USER=${GRAFANA_USERNAME}
+            - GRAFANA_PASS=${GRAFANA_PASSWORD}
+            - MQTT_USERNAME=${MOSQUITTO_USERNAME}
+            - MQTT_PASSWORD=${MOSQUITTO_PASSWORD}
+            - MQTT_HOST=mosquitto
+            - MONGO_USERNAME=${MONGO_USERNAME}
+            - MONGO_PASSWORD=${MONGO_PASSWORD}
+            - MONGO_DB_NAME=${MONGO_DB_NAME}
+            - MONGO_HOST=mongo
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:8888/"]
+            interval: 60s
+            timeout: 10s
+            retries: 5
+            start_period: 40s
+        restart: always
+        networks: 
+            - internal
+        depends_on:
+            - mongo
+            - grafana
+            - influxdb
+            - mosquitto
+
     # https_proxy:
     #     image: 'jc21/nginx-proxy-manager:latest'
     #     restart: unless-stopped
@@ -91,7 +164,6 @@ services:
 
 volumes:
     influxdb-storage:
-    chronograf-storage:
     grafana-storage:
     mosquitto-storage:
     mongodb-storage:
