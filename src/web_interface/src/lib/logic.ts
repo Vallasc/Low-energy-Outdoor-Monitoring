@@ -1,8 +1,12 @@
-import { jwtToken, toast } from "../stores"
+import { jwtToken, toast, user } from "../stores"
 import type { User, Device } from "./types"
+const PROD = import.meta.env.PROD
 
-// const LOMO_HOST = "http://localhost:80"
-const LOMO_HOST = ''
+if(PROD)
+  var LOMO_HOST = ''
+else
+  var LOMO_HOST = 'http://localhost:8888'
+
 const DEVICE_HOST = "http://192.168.1.10:80"
 
 let token: string | null = null;
@@ -113,10 +117,41 @@ export async function refreshToken(): Promise<any> {
   return null
 }
 
+export async function deleteUser(email: string, password: string): Promise<boolean> {
+  const response = await Fetch(LOMO_HOST + "/users/me", "DELETE", {
+    email: email,
+    password: password
+  })
+  if (response.status == 200) {
+    showToast("Command status", "Deletion successful")
+    return Promise.resolve(true)
+  } else {
+    showToast("Command status", "Something went wrong")
+  }
+  return Promise.resolve(false)
+}
+
+export async function changeUserPassword(email: string, password: string, newPassword: string): Promise<boolean> {
+  const response = await Fetch(LOMO_HOST + "/users/me", "PUT", {
+    email: email,
+    password: password,
+    newPassword: newPassword
+  })
+  if (response.status == 200) {
+    showToast("Password change command", "Changed successfully")
+    return Promise.resolve(true)
+  } else {
+    showToast("Password change command", "Something went wrong")
+  }
+  return Promise.resolve(false)
+}
+
 export async function getUser(): Promise<User | null> {
   const response = await Fetch(LOMO_HOST + "/users/me", "GET")
   if (response.status == 200) {
-    return await response.json()
+    let jsonUser = await response.json()
+    user.set(jsonUser)
+    return jsonUser
   }
   return Promise.resolve(null)
 }
@@ -130,6 +165,28 @@ export async function pairDevice(deviceName: string, latitude: number, longitude
   if(response.status == 200)
     return await response.json()
   return Promise.resolve(null)
+}
+
+export async function putDevice(deviceId:string, deviceConfig: any): Promise<boolean | null> {
+  const response = await Fetch(LOMO_HOST + "/devices/" + deviceId, "PUT", deviceConfig)
+  if (response.status == 200) {
+    showToast("Command status", "Device updated successfully")
+    return Promise.resolve(true)
+  } else {
+    showToast("Command status", "Something went wrong")
+  }
+  return Promise.resolve(false)
+}
+
+export async function deleteDevice(deviceId: string): Promise<boolean | null> {
+  const response = await Fetch(LOMO_HOST + "/devices/" + deviceId, "DELETE")
+  if (response.status == 200) {
+    showToast("Command status", "Device deleted successfully")
+    return Promise.resolve(true)
+  } else {
+    showToast("Command status", "Something went wrong")
+  }
+  return Promise.resolve(false)
 }
 
 export async function initHost(deviceInit: Device): Promise<boolean> {
