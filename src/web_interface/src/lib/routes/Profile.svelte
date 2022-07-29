@@ -1,30 +1,28 @@
 <script lang="ts">
     import { onMount } from 'svelte'
-    //import { getUser, updateUser, deleteUser } from '../logic'
+    import { getUser, deleteUser, showToast, changeUserPassword } from '../logic'
     import { navigate } from "svelte-navigator"
     import profileImage from "../../assets/profile.png";
     import { fade } from 'svelte/transition'
+
     let email : string
-    let name : string
-    let surname : string
     let password : string
     let newPassword : string
-    let prontogramUsername : string
     let disabled : boolean = true
-    /*onMount(async () => {
+
+    onMount(async () => {
         let response = await getUser()
         if(response != null){
             email = response.email
-            name = response.name
-            surname = response.surname
-            //password = response.password
-            prontogramUsername = response.prontogramUsername
             disabled = false
         }
 	})
+
     function validate() : boolean {
-        if(password.trim().length == 0)
+        if(password.trim().length == 0){
+            showToast("Validation error", "Please enter your password")
             return false
+        }
         return true
     }
     async function handleSubmit(event): Promise<void> {
@@ -32,14 +30,16 @@
             return;
         const {submitter: submitButton} = event;
         if(submitButton.id == "save") {
-            await updateUser(name, surname, email, password, newPassword == "" ?
-                                             null : newPassword, prontogramUsername)
+            if(newPassword.trim().length < 4){
+                showToast("Password error", "Password too short!")
+                return
+            }
+            await changeUserPassword(email, password, newPassword)
         } else if(submitButton.id == "delete"){
-            await deleteUser(email, password)
-            navigate("/")
+            if( await deleteUser(email, password) )
+                navigate("/")
         }
-    }*/
-    function handleSubmit(event){}
+    }
 </script>
 
 <div class="form" on:submit|preventDefault={handleSubmit}>
@@ -47,32 +47,22 @@
     <h1 class="h3 fw-normal">Your profile</h1>
     <form in:fade = {{duration: 200}}>
         <div class="mb-3">
-            <label for="_" class="form-label">Nome</label>
-            <input bind:value={name} type="Text" class="form-control" >
-        </div>
-        <div class="mb-3">
-            <label for="_" class="form-label">Cognome</label>
-            <input bind:value={surname} type="Text" class="form-control" >
-        </div>
-        <div class="mb-3">
             <label for="_" class="form-label">Email</label>
             <input bind:value={email} type="email" class="form-control" readonly>
         </div>
         <div class="mb-3">
             <label for="_" class="form-label">Password</label>
-            <input bind:value={password} type="password" class="form-control" placeholder="" required disabled = {disabled}>
+            <input bind:value={password} type="password" class="form-control" placeholder="Your current password" required disabled = {disabled}>
         </div>
+        <div style="padding:15px;"></div>
         <div class="mb-3">
-            <label for="_" class="form-label">Nuova password</label>
-            <input bind:value={newPassword} type="password" class="form-control" placeholder="" disabled = {disabled}>
+            <label for="_" class="form-label">Change Password</label>
+            <input bind:value={newPassword} type="password" class="form-control" placeholder="New password" disabled = {disabled}>
         </div>
-        <div class="mb-3">
-            <label for="_" class="form-label">Prontogram username</label>
-            <input bind:value={prontogramUsername} type="text" class="form-control" disabled = {disabled}>
-        </div>
-        <button id="save" class="w-100 mb-3 mt-3 btn btn-primary" type="submit" disabled = {disabled}>Salva</button>
+        <div style="padding:20px;"></div>
+        <button id="save" class="w-100 mb-3 mt-3 btn btn-primary" type="submit" disabled = {disabled}>Save</button>
         <hr class="mb-3 dropdown-divider"/>
-        <button id="delete" class="w-100 btn btn-danger" type="submit" disabled = {disabled} >Elimina account</button>
+        <button id="delete" class="w-100 btn btn-danger" type="submit" disabled = {disabled} >Delete account</button>
     </form>
 </div>
 
