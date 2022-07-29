@@ -22,20 +22,20 @@ class DeviceConfigProxyWorker:
             try:
                 data, address = self._s.recvfrom(4096)
                 payload = json.loads(data.decode("utf-8"))
-                device_user = self._mongo_client.get_device_user(payload['id'], payload['token'])
-                user = self._mongo_client.get_user(device_user['userId'])
+                (user, device) = self._mongo_client.get_user_device(payload['id'], payload['token'])
+                self._mongo_client.set_device_values(user["_id"], device["id"], payload)
+
                 conf = {}
-                for device in user['devices']:
-                    if device['id'] == payload['id']:
-                        conf['protocol'] = device['protocol']
-                        conf['sampleFrequency'] = device['sampleFrequency']
-                        conf['configUpdateFrequency'] = device['configUpdateFrequency']
-                        conf['minGasValue'] = device['minGasValue']
-                        conf['maxGasValue'] = device['maxGasValue']
-                        conf['latitude'] = device['latitude']
-                        conf['longitude'] = device['longitude']
-                        self._mongo_client.set_lastseen_device(payload['id'])
-                        break
+                conf['protocol'] = device['protocol']
+                conf['sampleFrequency'] = device['sampleFrequency']
+                conf['configUpdateFrequency'] = device['configUpdateFrequency']
+                conf['minGasValue'] = device['minGasValue']
+                conf['maxGasValue'] = device['maxGasValue']
+                conf['latitude'] = device['latitude']
+                conf['longitude'] = device['longitude']
+                conf['enablePerformanceMonitoring'] = device['enablePerformanceMonitoring']
+                
+                self._mongo_client.set_lastseen_device(user['_id'], device['id'])
                 self._s.sendto(bytes(json.dumps(conf), 'utf-8'), address)
             except Exception as e:
                 logging.error(e)
