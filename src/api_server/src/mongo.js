@@ -25,7 +25,16 @@ export class MongoManager {
     latitude: Number,
     longitude: Number,
     dashboardUid: String,
-    dashboardUrl: String
+    dashboardUrl: String,
+    host: String,
+    wifiSsid: String,
+    enablePerformanceMonitoring: Boolean,
+    totalMqttPacketCount: Number,
+    receivedMqttPacketCount: Number,
+    totalHttpPacketCount: Number,
+    receivedHttpPacketCount: Number,
+    mqttMeanTime: Number,
+    httpMeanTime: Number
   }
 
   Users = mongoose.model('Users', mongoose.Schema({
@@ -64,12 +73,57 @@ export class MongoManager {
     return await this.Users.findById(userId)
   }
 
-  async createDevice(userId, jsonDevice) {
-    return await Users.findById(userId)
+  async updateDevice(userId, device) {
+    // console.log("update")
+    // console.log(userId)
+    // console.log(device)
+    await this.Users.updateOne(
+      { _id: userId, "devices.id": device.id },
+      {
+        $set: {
+            "devices.$.protocol": device.protocol,
+            "devices.$.sampleFrequency": device.configUpdateFrequency,
+            "devices.$.sampleFrequency": device.sampleFrequency,
+            "devices.$.minGasValue": device.minGasValue,
+            "devices.$.dashboardUid": device.dashboardUid,
+            "devices.$.dashboardUrl": device.dashboardUrl,
+            "devices.$.enablePerformanceMonitoring": device.enablePerformanceMonitoring
+        }
+      }
+    )
   }
 
-  async findDeviceById(userId) {
-    return await Users.findById(userId)
+  async deleteDevice(userId, deviceId) {
+    await this.DevicesUsers.findByIdAndRemove(deviceId)
+    return await this.Users.updateOne(
+      { _id: userId },
+      { $pull: { 'devices': { id: deviceId } }}
+    )
+  }
+
+  async createDevice(userId, jsonDevice) {
+    const id = new mongoose.Types.ObjectId().toString()
+    jsonDevice.id = id
+    const deviceUser= {
+      _id: jsonDevice.id,
+      token: jsonDevice.token,
+      userId: userId,
+    }
+    await this.DevicesUsers.create(deviceUser)
+    await this.Users.updateOne(
+      { _id: userId },
+      { $push: { 'devices': jsonDevice }}
+    )
+    return id
+  }
+
+  async findDeviceById(userId, deviceId) {
+    const user = await Users.findById(userId)
+    for(let device of user.devices) {
+      if(device.id === deviceId)
+        return device
+    }
+    throw new Error("Device not found")
   }
 
 }
