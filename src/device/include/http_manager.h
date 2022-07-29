@@ -2,11 +2,11 @@
 #define HTTPMANAGER_H
 
 #include <HTTPClient.h>
-#include "protocol_manager.h"
 
 #define ROUTE "/devices"
 
-class HttpManager : public ProtocolManager {
+class HttpManager 
+{
   public:
     HttpManager(WiFiClient* _wifiClient, const char* _host, const int _port, const char* _id, const char* _token)
     {
@@ -16,7 +16,7 @@ class HttpManager : public ProtocolManager {
       port = _port;
       strcpy(id, _id);
       strcpy(token, _token);
-
+      perf_monitor = false;
     }
 
     ~HttpManager()
@@ -33,11 +33,12 @@ class HttpManager : public ProtocolManager {
       this->longitude = lon;
     }
 
-    void publish_sensors(float temp, float hum, float soil, float gas, int aqi, int wifi_rssi);
+    int publish_sensors(float temp, float hum, float soil, float gas, int aqi, int wifi_rssi);
 
   private:
     HTTPClient* client;
     WiFiClient* wifiClient;
+    WiFiUDP* wifi_udp_client;
 
     char host[32];
     int port;
@@ -45,6 +46,7 @@ class HttpManager : public ProtocolManager {
     char id[64];
     double latitude;
     double longitude;
+    bool perf_monitor;
 };
 
 #endif
