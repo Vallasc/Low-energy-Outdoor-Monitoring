@@ -6,10 +6,22 @@ import {
   PROXY_PORT,
   CONFIG_UPDATE_FREQUENCY,
   UDP_PORT,
-  MQTT_PORT } from './deviceConfig.js'
+  MQTT_PORT,
+  ENABLE_PERFORMANCE } from './deviceConfig.js'
 
-import {createClient } from './mosquitto.js'
-import {createUser, createDashboard } from './grafana.js'
+import {
+  createClient, 
+  deleteClient,
+  disableClient,
+  enableClient,
+  createRole,
+  deleteRole, } from './mosquitto.js'
+import {
+  createUser, 
+  createDashboard, 
+  deleteUser, 
+  changeUserPassword,
+  deleteDashboard } from './grafana.js'
 import {MongoManager} from './mongo.js'
 import mongoose from 'mongoose'
 
@@ -41,7 +53,7 @@ app.listen(PORT, '0.0.0.0', () => {
 })
 
 const handler = (req, res) => res.sendFile(path.join(__dirname, './public/index.html'))
-const routes = ["/", "/dashboard", "/signin", "/signup", "/signout", "/profile", "/devices"]
+const routes = ["/", "/dashboard", "/signin", "/signup", "/signout", "/profile", "/devices",  "/devices/*"]
 routes.forEach(route => app.get(route, handler))
 
 
@@ -89,6 +101,52 @@ app.get('/users/me', async (req, res) => {
 })
 
 app.put('/users/me', async (req, res) => {
+  const doc = await mongoManager.findUserById(req.body.email)
+  if(!doc.email || !doc.password || !doc.salt){
+    res.status(400).send()
+    return
+  }
+  const hash = crypto.createHash('sha256')
+                      .update(req.body.password + doc.salt)
+                      .digest('hex')
+  if(hash !== doc.password){
+    res.status(400).send()
+    return
+  }
+  const newHash = crypto.createHash('sha256')
+    .update(req.body.newPassword + doc.salt)
+    .digest('hex')
+  doc.password = newHash
+  doc.save()
+  await changeUserPassword(doc.garfanaId, req.body.newPassword)
+  res.status(200).send()
+})
+
+app.delete('/users/me', async (req, res) => {
+  const doc = await mongoManager.findUserById(req.body.email)
+  if(!doc.email || !doc.password || !doc.salt){
+    res.status(400).send()
+    return
+  }
+  const hash = crypto.createHash('sha256')
+                      .update(req.body.password + doc.salt)
+                      .digest('hex')
+  if(hash !== doc.password){
+    res.status(400).send()
+    return
+  }
+  try {
+    for(let device of doc.devices){
+      deleteClient(device.id)
+      deleteRole("role_" + device.id)
+    }
+    await deleteUser(doc.garfanaId, doc.garfanaFolderUid)
+    await mongoManager.deleteUser(doc.email)
+    res.status(200).send()
+  } catch (err) {
+    console.log(err)
+    res.status(400).send()
+  }
 })
 
 app.post('/auth', async (req, res) => {
@@ -113,7 +171,7 @@ app.post('/auth', async (req, res) => {
       token: token
     })
   } catch (err) {
-    console.error(err)
+    console.log(err)
     res.status(400).send()
   }
 })
@@ -150,11 +208,9 @@ async function verifyToken(req){
 app.post('/devices', async (req, res) => {
   try {
     const user = await verifyToken(req)
-    const id = new mongoose.Types.ObjectId().toString()
     const token = crypto.randomBytes(20).toString('hex')
     //console.log(req.body)
-    const device = {
-      id: id,
+    let device = {
       userId: user._id,
       name: req.body.name,
       protocol: PROTOCOL,
@@ -168,30 +224,29 @@ app.post('/devices', async (req, res) => {
       udpPort: parseInt(UDP_PORT),
       token: token,
       latitude: req.body.latitude,
-      longitude: req.body.longitude
+      longitude: req.body.longitude,
+      host: "",
+      wifiSsid: "",
+      enablePerformanceMonitoring: ENABLE_PERFORMANCE,
+      totalMqttPacketCount: 0,
+      receivedMqttPacketCount: 0,
+      totalHttpPacketCount: 0,
+      receivedHttpPacketCount: 0,
+      mqttMeanTime: 0,
+      httpMeanTime: 0
     }
-    const deviceUser= {
-      _id: id,
-      token: token,
-      userId: user._id,
-    }
-
-    try {
-      const doc = await mongoManager.DevicesUsers.create(deviceUser)
-    } catch (err) {
-      res.status(500)
-      return
-    }
-
-    createClient(id, token)
+    const id = await mongoManager.createDevice(user._id, device)
     const grafanaDashboardRes = await createDashboard(user.garfanaId, user.garfanaFolderUid, id)
-    device.dashboardUid = grafanaDashboardRes.uid
-    device.dashboardUrl = grafanaDashboardRes.url
-    user.devices.push(device)
-    user.save()
+    await mongoManager.updateDevice(user._id, {
+      id: id,
+      dashboardUid: grafanaDashboardRes.uid,
+      dashboardUrl: grafanaDashboardRes.url
+    })
+    createRole("role_" + id, id)
+    createClient(id, token, "role_" + id)
     res.status(200).send(device)
   } catch (err) {
-    console.error(err)
+    console.log(err)
     res.status(401).send("invalid token")
     return
   }
@@ -201,21 +256,43 @@ app.put('/devices/:id', async (req, res) => {
   try {
     const user = await verifyToken(req)
     const deviceId = req.params.id
-
-    await mongoManager.Users.updateOne(
-      { _id: user._id, "devices.id": deviceId },
-      {
-        $set: {
-            "devices.$.protocol": req.body.protocol,
-            "devices.$.sampleFrequency": req.body.sampleFrequency,
-            "devices.$.minGasValue": req.body.minGasValue,
-            "devices.$.maxGasValue": req.body.maxGasValue
-        }
-      }
-    )
+    await mongoManager.updateDevice(user._id, {
+      id: deviceId,
+      protocol: req.body.protocol,
+      sampleFrequency: req.body.configUpdateFrequency,
+      sampleFrequency: req.body.sampleFrequency,
+      minGasValue: req.body.minGasValue,
+      maxGasValue: req.body.maxGasValue,
+      enablePerformanceMonitoring: req.body.enablePerformanceMonitoring
+    })
+    // console.log(req.body)
+    if(req.body.protocol === "HTTP")
+      disableClient(deviceId)
+    else
+      enableClient(deviceId)
+    
     res.status(200).send()
   } catch (err) {
-    console.error(err)
+    console.log(err)
+    res.status(401).send("invalid token")
+  }
+})
+
+app.delete('/devices/:id', async (req, res) => {
+  try {
+    const user = await verifyToken(req)
+    const deviceId = req.params.id
+    try {
+      for( let d of user.devices )
+        if(d.id === deviceId){
+          await deleteDashboard(d.dashboardUid)
+          break;
+        }
+    } catch (err) {}
+    mongoManager.deleteDevice(user._id, deviceId)
+    res.status(200).send()
+  } catch (err) {
+    console.log(err)
     res.status(401).send("invalid token")
   }
 })
