@@ -3,7 +3,7 @@
 </script>
 
 <div class="row">
-  <nav class="col-md-3 col-lg-3 bg-white pt-3">
+  <nav class="col-md-3 col-lg-2 bg-white pt-3">
     <div
       class="mb-3 d-flex justify-content-between flex-wrap align-items-center"
     >
@@ -30,29 +30,25 @@
         </svg>
       </button>
     </div>
-    <hr />
     <div class:navhide>
       <ul class="nav nav-pills flex-column mb-auto">
+        <slot name="item-t0" />
         <slot name="item-t1" />
         <slot name="item-t2" />
         <slot name="item-t3" />
         <slot name="item-t4" />
         <slot name="item-t5" />
         <slot name="item-t6" />
+        <slot name="item-t7" />
+        <slot name="item-t8" />
+        <slot name="item-t9" />
+        <slot name="item-t10" />
+        <slot name="item-t11" />
+        <slot name="item-t12" />
       </ul>
-      <hr />
-      <ul class="nav nav-pills flex-column mb-auto">
-        <slot name="item-b1" />
-        <slot name="item-b2" />
-        <slot name="item-b3" />
-        <slot name="item-b4" />
-        <slot name="item-b5" />
-        <slot name="item-b6" />
-      </ul>
-      <hr class="nav-btn-hide"/>
     </div>
   </nav>
-  <div class="col-md-9 col-lg-9 px-md-4 main">
+  <div class="col-md-9 col-lg-10 px-md-4 main">
     <slot name="content" />
   </div>
 </div>
@@ -67,10 +63,8 @@
   .main {
     height: 100%;
     overflow: auto;
-  }
-
-  hr {
-    size: 0.5px;
+    background-color: #f4f5f5;
+    padding-bottom: 30px;
   }
   nav {
     border-right: 1px solid var(--bs-gray-400);

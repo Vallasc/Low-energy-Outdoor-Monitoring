@@ -3,10 +3,11 @@
   export let link: string = "/"
   export let indent: number = 0
   export let hide: boolean = false
+  export let selectable: boolean = true
   let active: boolean
 
     $: {
-      active = $location === link
+      active = $location === link && selectable
     }
 </script>
 
