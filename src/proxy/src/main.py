@@ -17,7 +17,6 @@ if __name__ == "__main__":
 
     logging.info("Starting http thread")
     http_proxy = HttpProxyWorker()
-    # http_proxy.begin()
     http_thread = threading.Thread(target=http_proxy.begin)
     http_thread.daemon = True
     http_thread.start()
