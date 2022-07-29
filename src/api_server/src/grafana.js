@@ -12,56 +12,51 @@ const GRAFANA_PASS = process.env.GRAFANA_PASS || "admin"
 const baseUrl = `http://${GRAFANA_USER}:${GRAFANA_PASS}@${GRAFANA_HOST}:${GRAFANA_PORT}`
 
 export async function createUser(email, username, password) {
-  try {
-    let res = await axios.post(baseUrl + "/api/admin/users", {
-      name: username,
-      email: email,
-      login: username,
-      password: password
-    })
-    if (res.status == 200) {
-      var folderRes = await createFolder(res.data.id, username)
-      if (folderRes.status != 200)
-        throw new Error("Couldn't create grafana user")
-    } else {
+  let res = await axios.post(baseUrl + "/api/admin/users", {
+    name: username,
+    email: email,
+    login: username,
+    password: password
+  })
+  if (res.status == 200) {
+    var folderRes = await createFolder(res.data.id, username)
+    if (folderRes.status != 200)
       throw new Error("Couldn't create grafana user")
-    }
-    res.data.folderUid = folderRes.data.uid
-    return res.data
-  } catch (e) {
-    throw e
+  } else {
+    throw new Error("Couldn't create grafana user")
   }
+  res.data.folderUid = folderRes.data.uid
+  return res.data
 }
 
-export async function deleteUser(username) {
+export async function deleteUser(userId, folderUid) {
+  await deleteFolder(folderUid)
+  return await axios.delete(baseUrl + "/api/admin/users/" + userId)
+}
+
+export async function changeUserPassword(userId, newPassword) {
+  return await axios.put(baseUrl + "/api/admin/users/" + userId + "/password", {
+    password: newPassword
+  })
 }
 
 export async function createFolder(userId, username) {
-  try {
-    const res = await axios.post(baseUrl + "/api/folders", {
-      title: username + " dashboards"
+  const res = await axios.post(baseUrl + "/api/folders", {
+    title: username + " dashboards"
+  })
+  if (res.status == 200) {
+    const resPerm = await axios.post(baseUrl + "/api/folders/" + res.data.uid + "/permissions", {
+      items: [{
+        userId: userId,
+        permission: 1
+      }]
     })
-    if (res.status == 200) {
-      const resPerm = await axios.post(baseUrl + "/api/folders/" + res.data.uid + "/permissions", {
-        items: [{
-          userId: userId,
-          permission: 1
-        }]
-      })
-    }
-    return res;
-  } catch (e) {
-    throw e
   }
+  return res;
 }
 
 export async function deleteFolder(folderUid) {
-  try {
-    var res = await axios.delete(baseUrl + "/api/folders/" + folderUid)
-    return res.data
-  } catch (e) {
-    console.log(e.message)
-  }
+  return await axios.delete(baseUrl + "/api/folders/" + folderUid)
 }
 
 export async function createDashboard(userId, folderUid, deviceId) {
@@ -85,30 +80,22 @@ export async function createDashboard(userId, folderUid, deviceId) {
     message: "Initial commit",
     overwrite: true
   }
-  try {
-    var res = await axios.post(baseUrl + "/api/dashboards/db", payload)
-    if(res.status == 200)
-      await axios.post(baseUrl + "/api/dashboards/uid/" + res.data.uid + "/permissions", {
-        items: [
-          {
-            role: "Viewer",
-            permission: 1
-          },{
-            userId: userId,
-            permission: 1
-        }]
-      })
-    return res.data
-  } catch (e) {
-    console.log(e.message)
-  }
+  var res = await axios.post(baseUrl + "/api/dashboards/db", payload)
+  if(res.status == 200)
+    await axios.post(baseUrl + "/api/dashboards/uid/" + res.data.uid + "/permissions", {
+      items: [
+        {
+          role: "Viewer",
+          permission: 1
+        },{
+          userId: userId,
+          permission: 1
+      }]
+    })
+  return res.data
 }
 
 export async function deleteDashboard(dashboardUid) {
-  try {
-    var res = await axios.delete(baseUrl + "/api/dashboards/uid/" + dashboardUid)
-    return res.data
-  } catch (e) {
-    console.log(e.message)
-  }
+  var res = await axios.delete(baseUrl + "/api/dashboards/uid/" + dashboardUid)
+  return res.data
 }
