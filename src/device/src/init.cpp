@@ -106,6 +106,10 @@ void InitServer::init_from_json(String json_obj)
     double lon = obj[JSON_LON];
     pref->putDouble(KEY_LON, lon);
   }
+  if(obj.containsKey(JSON_PERFORMANCE)){
+    bool perf = obj[JSON_PERFORMANCE];
+    pref->putBool(KEY_PERF, perf);
+  }
   preferences.putBool(KEY_DEVICE_CONFIGURED, true);
   close_preferences();
 }
