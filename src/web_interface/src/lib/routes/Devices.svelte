@@ -4,6 +4,7 @@
   import {getUser} from "../logic"
   import { navigate } from "svelte-navigator"
   import { selectedDevice } from "../../stores"
+  import { fade } from 'svelte/transition'
 
   let showPairScreen = false
 
@@ -14,23 +15,23 @@
     console.log(devices)
   }
 
-  get()
-  $selectedDevice = null
-
   function openDevice(device){
     $selectedDevice = device
     navigate("/devices/" + device.id)
   }
 
+  $: if(!showPairScreen) get()
+  $selectedDevice = null
 </script>
 
 <div class="row row-cols-auto justify-content-center">
-  <div class="col">
-    <button class="btn btn-outline-primary btn-pair" on:click={() => showPairScreen = true}
-      >Pair a device</button>
+  <div class="col" in:fade = {{duration: 200}}>
+    <div class="div-pair">
+      <button class="btn btn-outline-primary btn-pair" on:click={() => showPairScreen = true}>Pair a device</button>
+    </div>
   </div>
   {#each devices as device}
-    <div class="col">
+    <div class="col" in:fade = {{duration: 200}}>
       <DeviceCard>
         <div slot="title">{device.name}</div>
         <div slot="body">
@@ -59,7 +60,10 @@
   .btn-pair {
     width: 200px;
     height: 200px;
+  }
+  .div-pair {
     margin: 15px;
+    background-color: #fff;
   }
   .hidden {
     width: 200px;
