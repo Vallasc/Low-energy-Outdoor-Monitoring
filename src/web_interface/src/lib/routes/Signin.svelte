@@ -7,7 +7,7 @@
   
   let email: string;
   let password: string;
-  let remember: boolean = false;
+  let remember: boolean = true;
   async function handleSubmit(): Promise<void> {
     if (await signin({email: email, password: password}, remember)) {
       navigate("/");
@@ -53,7 +53,7 @@
           class="form-check-input"
           type="checkbox"
         />
-        <label class="form-check-label" for="gridCheck"> Rimani loggato </label>
+        <label class="form-check-label" for="gridCheck">Remember me</label>
       </div>
     </div>
     <button class="w-100 mb-3 btn btn-primary" type="submit">Sign in</button>
