@@ -21,8 +21,16 @@ interface Device {
     mqttPort?: number
     host?: string
     wifiSsid?: string
-    wifiPassword?: string
     token?: string
     latitude: number
     longitude: number
+    dashboardUid?: string,
+    dashboardUrl?: string,
+    enablePerformanceMonitoring?: boolean,
+    totalMqttPacketCount?: number,
+    receivedMqttPacketCount?: number,
+    totalHttpPacketCount?: number,
+    receivedHttpPacketCount?: number,
+    mqttMeanTime?: number,
+    httpMeanTime?: number
 }
