@@ -24,14 +24,15 @@ class HttpProxyWorker:
             token = bearer.split()[1]
 
             p = json.loads(request.data.decode("utf-8"))
-            if self._mongo_client.get_device_user(id, token) is None:
+            device_user = self._mongo_client.get_device_user(id, token)
+            if device_user is None:
                 return "unauthorized", 401
 
             try:
                 self._influx.save_record(id, p['latLong'], p['temp'], p['hum'], p['soil'], p['gas'], p['aqi'], p['rssi'])
                 logging.info("MQTT influx write {device} -> {payload}" \
                         .format(device=id, payload=p))
-                self._mongo_client.set_lastseen_device(id)
+                self._mongo_client.set_lastseen_device(device_user['userId'], device_user['_id'])
             except Exception as e:
                 logging.error(e)
             return "", 200
