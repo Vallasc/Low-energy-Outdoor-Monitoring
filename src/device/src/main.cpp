@@ -6,16 +6,17 @@
 
 #include "config.h"
 #include "state.h"
-#include "protocol_manager.h"
 #include "mqtt_manager.h"
 #include "http_manager.h"
 #include "init.h"
 #include "sensors.h"
 #include "wifi_utils.h"
 #include "config_ping.h"
+#include "evaluation.h"
 
  /* Conversion factor for micro seconds to minutes */
 #define uS_TO_S_FACTOR 60000000ULL
+
 RTC_DATA_ATTR unsigned long boot_count = 0;
 
 WiFiClient wifi_client;
@@ -41,7 +42,6 @@ void start_deepsleep(int minutes)
 
 void first_config()
 {
-  boot_count = 0;
   Serial.println("Waiting for initialization...");
   InitServer init_tasks;
   init_tasks.init();
@@ -55,7 +55,37 @@ void first_config()
   ESP.restart();
 }
 
+void get_remote_config()
+{
+  InitServer init_tasks;
+  ConfigPing* udp_config = new ConfigPing(&wifi_udp_client, HOST.c_str(), CONFIG_PORT, 
+                                          DEVICE_ID.c_str(), TOKEN.c_str(), WIFI_SSID.c_str(), &init_tasks);
+  udp_config->begin();
+  if(PERFORMANCE_MONITORING)
+    udp_config->update_config(
+      total_mqtt_packet_count, 
+      received_mqtt_packet_count,
+      total_http_packet_count,
+      received_http_packet_count,
+      mqtt_mean_time,
+      http_mean_times
+    );
+  else
+    udp_config->update_config();
+  delete(udp_config);
+  Serial.println("Configuration changed");
+  load_config();
+}
+
+void mqtt_callback(char* topic, byte* payload, unsigned int length) {
+  if(strcmp(topic, mqtt_mng->get_full_topic()) == 0)
+    STOP_EVALUATE_MQTT
+}
+
 void setup() {
+  if(boot_count == 0)
+    init_evaluation_vars();
+
   esp_sleep_enable_ext0_wakeup(GPIO_NUM_33, 0);
 
   delay(1000);
@@ -67,35 +97,34 @@ void setup() {
     load_debug_config();
   load_config();
 
-  if(!DEVICE_CONFIGURED)
+  if(!DEVICE_CONFIGURED){
     first_config();
-
+    boot_count = 0;
+    init_evaluation_vars();
+  }
   print_config();
 
   pinMode(BUTTON_PIN, INPUT_PULLUP);
-	attachInterrupt(BUTTON_PIN, isr, FALLING);
+	attachInterrupt(BUTTON_PIN, isr, CHANGE);
 
   if( !wifi_connect(WIFI_SSID.c_str(), WIFI_PASS.c_str()) )
     ESP.restart();
 
+  get_remote_config();
+  boot_count += CONFIG_FREQUENCY;
   // Get remote device config
-  if(boot_count % SAMPLE_FREQUENCY != 0)
+  if((boot_count - CONFIG_FREQUENCY) % SAMPLE_FREQUENCY != 0)
   {
-    InitServer init_tasks;
-    ConfigPing* udp_config = new ConfigPing(&wifi_udp_client, HOST.c_str(), CONFIG_PORT, 
-                                            DEVICE_ID.c_str(), TOKEN.c_str(), &init_tasks);
-    udp_config->begin();
-    udp_config->update_config();
-    free(udp_config);
-    Serial.println("Configuration changed");
-    boot_count += CONFIG_FREQUENCY;
     start_deepsleep(CONFIG_FREQUENCY);
     return; // useless
   }
 
   if(PROTOCOL_TYPE == "MQTT")
   {
-    mqtt_mng = new MQTTManager(&wifi_client, HOST.c_str(), MQTT_PORT, DEVICE_ID.c_str(), TOKEN.c_str());
+    if(PERFORMANCE_MONITORING)
+      mqtt_mng = new MQTTManager(&wifi_client, HOST.c_str(), MQTT_PORT, DEVICE_ID.c_str(), TOKEN.c_str(), mqtt_callback);
+    else
+      mqtt_mng = new MQTTManager(&wifi_client, HOST.c_str(), MQTT_PORT, DEVICE_ID.c_str(), TOKEN.c_str());
     mqtt_mng->set_lat_long(LAT, LON);
     if( !((MQTTManager*)mqtt_mng)->begin() ){
       delete(mqtt_mng);
@@ -109,6 +138,7 @@ void setup() {
     http_mng->begin();
   }
 
+  // fare subscribe mqtt tanto non funziona
   sensors = new Sensors(MIN_GAS_VALUE, MAX_GAS_VALUE);
   sensors->begin();
 
@@ -125,18 +155,29 @@ void setup() {
 
   if(PROTOCOL_TYPE == "MQTT")
   {
-    mqtt_mng->publish_sensors(temp, hum, soil, gas, aqi, rssi);
+    if(PERFORMANCE_MONITORING){
+      int timeout = 5000;
+      START_EVALUATE_MQTT(mqtt_mng->publish_sensors(temp, hum, soil, gas, aqi, rssi))
+      while(--timeout > 0 && start_ms_mqtt != 0)
+        mqtt_mng->loop();
+    }
+    else
+    {
+      mqtt_mng->publish_sensors(temp, hum, soil, gas, aqi, rssi);
+    }
     delay(1000);
+    mqtt_mng->disconnect();
     delete(mqtt_mng);
   }
   else
   {
-    http_mng->publish_sensors(temp, hum, soil, gas, aqi, rssi);
-    delay(1000);
+    if(PERFORMANCE_MONITORING)
+      EVALUATE_HTTP(http_mng->publish_sensors(temp, hum, soil, gas, aqi, rssi))
+    else
+      http_mng->publish_sensors(temp, hum, soil, gas, aqi, rssi);
     delete(http_mng);
   }
-
-  boot_count += CONFIG_FREQUENCY;
+  print_stats();
   start_deepsleep(CONFIG_FREQUENCY);
 }
 
