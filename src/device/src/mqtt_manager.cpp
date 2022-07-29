@@ -21,6 +21,9 @@ bool MQTTManager::begin()
   {
     Serial.print("Broker not connected: max mqtt retries reached.");
     return false;
+  } else {
+    client->setCallback(callback);
+    client->subscribe(full_topic);
   }
   return true;
 }
