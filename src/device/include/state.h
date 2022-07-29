@@ -21,6 +21,7 @@
 #define KEY_WIFI_PASS "W_PASS" // String
 #define KEY_LAT "LAT" // double
 #define KEY_LON "LON" // double
+#define KEY_PERF "PERF" // bool
 
 #define PREF_NAME "LOMO"
 
@@ -43,6 +44,7 @@ namespace
   String WIFI_PASS;
   double LAT;
   double LON;
+  bool PERFORMANCE_MONITORING;
   Preferences preferences;
 
   static Preferences* open_preferences()
@@ -59,7 +61,7 @@ namespace
   static void print_config()
   {
     Serial.println("Config:");
-    Serial.println("- Device configured: " + String(DEVICE_CONFIGURED));
+    Serial.println("- device configured: " + String(DEVICE_CONFIGURED));
     Serial.println("- id: " + DEVICE_ID);
     Serial.println("- name: " + DEVICE_NAME);
     Serial.println("- protocol: " + PROTOCOL_TYPE);
@@ -76,6 +78,7 @@ namespace
     Serial.println("- wifiPassword: " + WIFI_PASS);
     Serial.println("- latitude: " + String(LAT));
     Serial.println("- longitude: " + String(LON));
+    Serial.println("- performance monitoring: " + String(PERFORMANCE_MONITORING));
   }
 
   static void load_config()
@@ -98,6 +101,7 @@ namespace
     WIFI_PASS = preferences.getString(KEY_WIFI_PASS, "NONE");
     LAT = preferences.getDouble(KEY_LAT, -1);
     LON = preferences.getDouble(KEY_LON, -1);
+    PERFORMANCE_MONITORING = preferences.getBool(KEY_PERF, false);
     close_preferences();
   }
 
@@ -122,6 +126,7 @@ namespace
     preferences.putString(KEY_WIFI_PASS, DEBUG_WIFI_PASS);
     preferences.putDouble(KEY_LAT, DEBUG_LAT);
     preferences.putDouble(KEY_LON, DEBUG_LONG);
+    preferences.putBool(KEY_PERF, DEBUG_KEY_PERF);
     close_preferences();
   }
 

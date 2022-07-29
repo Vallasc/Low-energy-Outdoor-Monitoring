@@ -22,6 +22,8 @@
 #define JSON_WIFI_PASS "wifiPassword"
 #define JSON_LAT "latitude"
 #define JSON_LON "longitude"
+#define JSON_PERFORMANCE "enablePerformanceMonitoring"
+
 class InitServer
 {
   public:
