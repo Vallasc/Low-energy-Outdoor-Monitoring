@@ -20,15 +20,19 @@ class MqttProxyWorker:
         client.subscribe("devices/#")
 
     def on_message(self, client, userdata, msg):
-        splitted = msg.topic.split("/")
-        device_id = splitted[-1]
-        # temp/hum/soil/gas/aqi/rssi/lat,lon
-        payload = msg.payload.decode("utf-8")
-        p = payload.split("/")
-        self.influx.save_record(device_id, p[6], p[0], p[1], p[2], p[3], p[4], p[5])
-        logging.info("MQTT influx write {device} -> {topic}: {payload}" \
-            .format(device=device_id, topic=msg.topic, payload=payload))
-        self._mongo_client.set_lastseen_device(device_id)
+        try:
+            splitted = msg.topic.split("/")
+            device_id = splitted[-1]
+            # temp/hum/soil/gas/aqi/rssi/lat,lon
+            payload = msg.payload.decode("utf-8")
+            p = payload.split("/")
+            self.influx.save_record(device_id, p[6], p[0], p[1], p[2], p[3], p[4], p[5])
+            logging.info("MQTT influx write {device} -> {topic}: {payload}" \
+                .format(device=device_id, topic=msg.topic, payload=payload))
+            device_user = self._mongo_client.get_device_user(device_id)
+            self._mongo_client.set_lastseen_device(device_user['userId'], device_user['_id'])
+        except Exception as e:
+            logging.error(e)
 
     def begin(self):
         logging.basicConfig(level=logging.INFO)
