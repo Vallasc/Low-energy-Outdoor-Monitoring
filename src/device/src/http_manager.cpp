@@ -11,7 +11,7 @@ bool HttpManager::begin()
   return true;
 }
 
-void HttpManager::publish_sensors(float temp, float hum, float soil, float gas, int aqi, int wifi_rssi)
+int HttpManager::publish_sensors(float temp, float hum, float soil, float gas, int aqi, int wifi_rssi)
 {
   Serial.println("Publish sensors HTTP");
   char payload[256];
@@ -28,4 +28,5 @@ void HttpManager::publish_sensors(float temp, float hum, float soil, float gas, 
 
   Serial.print("HTTP Response code: ");
   Serial.println(httpResponseCode);
+  return httpResponseCode;
 }
