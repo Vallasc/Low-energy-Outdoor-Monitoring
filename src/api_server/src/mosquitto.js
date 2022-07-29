@@ -10,19 +10,19 @@ client.on("connect",function(){
   console.log("MQTT broker connected "+ client.connected);
 })
 
-export function createClient(username, password) {
+export function createClient(username, password, rolename) {
   const command = {
     "commands":[
       {
         "command": "createClient",
         "username": username,
         "password": password,
-        "roles": [{ "rolename": "device"}]
+        "roles": [{ "rolename": rolename}]
       }
     ]
   }
-  client.publish("$CONTROL/dynamic-security/v1", JSON.stringify(command), console.log)
-  console.log("MQTT client created " + username)
+  client.publish("$CONTROL/dynamic-security/v1", JSON.stringify(command))
+  // console.log("MQTT client created " + username)
 }
 
 export function deleteClient(username) {
@@ -37,12 +37,54 @@ export function deleteClient(username) {
   client.publish("$CONTROL/dynamic-security/v1", JSON.stringify(command))
 }
 
-export function disableClient(){
+export function disableClient(username){
   const command = {
     "commands":[
       {
         "command": "disableClient",
         "username": username
+      }
+    ]
+  }
+  client.publish("$CONTROL/dynamic-security/v1", JSON.stringify(command))
+}
+
+export function enableClient(username){
+  const command = {
+    "commands":[
+      {
+        "command": "enableClient",
+        "username": username
+      }
+    ]
+  }
+  client.publish("$CONTROL/dynamic-security/v1", JSON.stringify(command))
+}
+
+export function createRole(rolename, username){
+  const command = {
+    "commands":[
+      {
+        "command": "createRole",
+			  "rolename": rolename,
+			  "acls": [
+				  { "acltype": "publishClientSend", "topic": "devices/" + username, "priority": 1, "allow": true},
+          { "acltype": "publishClientReceive", "topic": "devices/" + username, "priority": 1, "allow": true},
+          { "acltype": "subscribePattern", "topic": "devices/" + username, "priority": 1, "allow": true},
+          { "acltype": "unsubscribePattern", "topic": "devices/" + username, "priority": 1, "allow": true}
+			  ] 
+      }
+    ]
+  }
+  client.publish("$CONTROL/dynamic-security/v1", JSON.stringify(command))
+}
+
+export function deleteRole(rolename){
+  const command = {
+    "commands":[
+      {
+        "command": "deleteRole",
+			  "rolename": rolename
       }
     ]
   }
