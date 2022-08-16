@@ -3,6 +3,7 @@ import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
 const defaultDashboard = require("./defualtDashboard.json");
+const defaultAlert = require("./defualtAlert.json");
 
 const GRAFANA_HOST = process.env.GRAFANA_HOST || "127.0.0.1"
 const GRAFANA_PORT = process.env.GRAFANA_PORT || 3333
@@ -10,6 +11,17 @@ const GRAFANA_USER = process.env.GRAFANA_USER || "admin"
 const GRAFANA_PASS = process.env.GRAFANA_PASS || "admin"
 
 const baseUrl = `http://${GRAFANA_USER}:${GRAFANA_PASS}@${GRAFANA_HOST}:${GRAFANA_PORT}`
+
+let datasourceUid = undefined
+
+export async function setDatasource() {
+  let res = await axios.get(baseUrl + "/api/datasources", {})
+  if (res.status == 200) {
+    datasourceUid = res.data[0].uid
+  } else {
+    throw new Error("Couldn't access influx data source")
+  }
+}
 
 export async function createUser(email, username, password) {
   let res = await axios.post(baseUrl + "/api/admin/users", {
@@ -98,4 +110,54 @@ export async function createDashboard(userId, folderUid, deviceId) {
 export async function deleteDashboard(dashboardUid) {
   var res = await axios.delete(baseUrl + "/api/dashboards/uid/" + dashboardUid)
   return res.data
+}
+
+export async function createAlert(deviceId, folderUid) {
+  let alert = JSON.parse(JSON.stringify(defaultAlert)
+        .replaceAll("${deviceId}", deviceId)
+        .replaceAll("${title}", "alert_" + deviceId)
+        .replaceAll("${datasourceUid}", datasourceUid)
+        .replaceAll("${folderUid}", folderUid))
+  const res = await axios.post(baseUrl + "/api/v1/provisioning/alert-rules", alert)
+  return res.data
+}
+
+export async function deleteAlert(alertUid) {
+  const res = await axios.delete(baseUrl + "/api/v1/provisioning/alert-rules/" + alertUid)
+  return res.data
+}
+
+export async function setupAlertConfigReceivers(alertUrl) {
+  const res = await axios.post(baseUrl + "/api/alertmanager/grafana/config/api/v1/alerts",
+    {
+      "template_files": {
+        "lomo_template": "{{ define \"lomo_template\" }}\n {\n\"deviceId\": \"$deviceId\"\n}\n{{ end }}"
+      },
+      "alertmanager_config": {
+        "route": {
+          "receiver": "LOMO_API"
+        },
+        "templates": [
+          "lomo_template"
+        ],
+        "receivers": [
+          {
+            "name": "LOMO_API",
+            "grafana_managed_receiver_configs": [
+              {
+                "name": "LOMO_API",
+                "type": "webhook",
+                "disableResolveMessage": false,
+                "settings": {
+                  "httpMethod": "POST",
+                  "url": alertUrl
+                },
+                "secureFields": {}
+              }
+            ]
+          }
+        ]
+      }
+  })
+  return res;
 }
