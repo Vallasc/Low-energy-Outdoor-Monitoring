@@ -21,6 +21,7 @@ interface Device {
     mqttPort?: number
     host?: string
     wifiSsid?: string
+    wifiPassword?: string
     token?: string
     latitude: number
     longitude: number
@@ -32,5 +33,8 @@ interface Device {
     totalHttpPacketCount?: number,
     receivedHttpPacketCount?: number,
     mqttMeanTime?: number,
-    httpMeanTime?: number
+    httpMeanTime?: number,
+    alertEnable?: boolean,
+    lastAlertTime?: number,
+    lastAlert?: string
 }
