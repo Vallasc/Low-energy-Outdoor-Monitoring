@@ -13,6 +13,7 @@
   let minGasValue = -1
   let maxGasValue = -1
   let enableMonitoring = false
+  let enableAlert = false
 
   async function saveButton() {
     await putDevice(deviceId, {
@@ -21,7 +22,8 @@
       configUpdateFrequency: configUpdateFrequency,
       minGasValue: minGasValue,
       maxGasValue: maxGasValue,
-      enablePerformanceMonitoring: enableMonitoring
+      enablePerformanceMonitoring: enableMonitoring,
+      alertEnable: enableAlert
     })
     await init()
   }
@@ -38,6 +40,7 @@
     minGasValue = $selectedDevice.minGasValue
     maxGasValue = $selectedDevice.maxGasValue
     enableMonitoring = $selectedDevice.enablePerformanceMonitoring
+    enableAlert = $selectedDevice.alertEnable
   }
 
   function updateSampleFrequencyParams(){
@@ -189,6 +192,31 @@
       {/if}
     </div>
     <div class="block">
+      <h5>Alert</h5>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="check-perf" bind:checked = {enableAlert}>
+        <label class="form-check-label" for="check-perf">
+          Enable alerting messages when AQI >= 2
+        </label>
+      </div>
+      {#if enableAlert}
+        <table class="table align-middle table-striped">
+          <thead>
+            <tr>
+              <th>Last alert</th>
+              <th>Info</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{$selectedDevice.lastAlertTime}</td>
+              <td>{$selectedDevice.lastAlert}</td>
+            </tr>
+          </tbody>
+        </table>
+      {/if}
+    </div>
+    <div class="block">
       <h5>Prediction</h5>
       <table class="table align-middle table-striped">
         <thead>
@@ -201,30 +229,6 @@
         <tbody>
           <tr>
             <th> Mean Square Error (MSE)</th>
-            <td>0</td>
-            <td>0</td>
-          </tr>
-          <tr>
-            <th>Bo</th>
-            <td>0</td>
-            <td>0</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="block">
-      <h5>Alert</h5>
-      <table class="table align-middle table-striped">
-        <thead>
-          <tr>
-            <th>Bo</th>
-            <th>Bo</th>
-            <th>Bo</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th>Bo</th>
             <td>0</td>
             <td>0</td>
           </tr>
