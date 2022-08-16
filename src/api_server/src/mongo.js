@@ -26,6 +26,7 @@ export class MongoManager {
     longitude: Number,
     dashboardUid: String,
     dashboardUrl: String,
+    alertUid: String,
     host: String,
     wifiSsid: String,
     enablePerformanceMonitoring: Boolean,
@@ -34,7 +35,10 @@ export class MongoManager {
     totalHttpPacketCount: Number,
     receivedHttpPacketCount: Number,
     mqttMeanTime: Number,
-    httpMeanTime: Number
+    httpMeanTime: Number,
+    alertEnable: Boolean,
+    lastAlertTime: Number,
+    lastAlert: String
   }
 
   Users = mongoose.model('Users', mongoose.Schema({
@@ -74,9 +78,6 @@ export class MongoManager {
   }
 
   async updateDevice(userId, device) {
-    // console.log("update")
-    // console.log(userId)
-    // console.log(device)
     await this.Users.updateOne(
       { _id: userId, "devices.id": device.id },
       {
@@ -87,7 +88,11 @@ export class MongoManager {
             "devices.$.minGasValue": device.minGasValue,
             "devices.$.dashboardUid": device.dashboardUid,
             "devices.$.dashboardUrl": device.dashboardUrl,
-            "devices.$.enablePerformanceMonitoring": device.enablePerformanceMonitoring
+            "devices.$.enablePerformanceMonitoring": device.enablePerformanceMonitoring,
+            "devices.$.alertEnable": device.alertEnable,
+            "devices.$.alertUid": device.alertUid,
+            "devices.$.lastAlertTime": device.lastAlertTime,
+            "devices.$.lastAlert": device.lastAlert
         }
       }
     )
@@ -118,12 +123,17 @@ export class MongoManager {
   }
 
   async findDeviceById(userId, deviceId) {
-    const user = await Users.findById(userId)
+    const user = await this.Users.findById(userId)
     for(let device of user.devices) {
       if(device.id === deviceId)
         return device
     }
     throw new Error("Device not found")
+  }
+
+  async findUserIdByDeviceId(deviceId) {
+    const deviceUser = await this.DevicesUsers.findById(deviceId)
+    return deviceUser.userId
   }
 
 }

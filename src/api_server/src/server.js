@@ -15,13 +15,17 @@ import {
   disableClient,
   enableClient,
   createRole,
-  deleteRole, } from './mosquitto.js'
+  deleteRole } from './mosquitto.js'
 import {
   createUser, 
   createDashboard, 
   deleteUser, 
   changeUserPassword,
-  deleteDashboard } from './grafana.js'
+  deleteDashboard,
+  setupAlertConfigReceivers,
+  createAlert,
+  deleteAlert,
+  setDatasource } from './grafana.js'
 import {MongoManager} from './mongo.js'
 import mongoose from 'mongoose'
 
@@ -49,6 +53,8 @@ let mongoManager
 //Initiate MongoDB and start server
 app.listen(PORT, '0.0.0.0', () => {
   mongoManager = new MongoManager()
+  setDatasource()
+  setupAlertConfigReceivers("http://lomoapi:" + PORT + "/alerts")
   console.log(`HTTP server started on PORT ${PORT}`)
 })
 
@@ -233,7 +239,9 @@ app.post('/devices', async (req, res) => {
       totalHttpPacketCount: 0,
       receivedHttpPacketCount: 0,
       mqttMeanTime: 0,
-      httpMeanTime: 0
+      httpMeanTime: 0,
+      alertEnable: false,
+      lastAlertTime: -1
     }
     const id = await mongoManager.createDevice(user._id, device)
     const grafanaDashboardRes = await createDashboard(user.garfanaId, user.garfanaFolderUid, id)
@@ -256,6 +264,21 @@ app.put('/devices/:id', async (req, res) => {
   try {
     const user = await verifyToken(req)
     const deviceId = req.params.id
+    let device = undefined
+    try {
+      for( let d of user.devices )
+        if(d.id === deviceId){
+          device = d
+          break;
+        }
+    } catch (err) {}
+    let alertRes = {uid: undefined}
+    if(device && req.body.alertEnable !== undefined) {
+      if(req.body.alertEnable && !device.alertEnable)
+        alertRes = await createAlert(deviceId, user.garfanaFolderUid)
+      if(!req.body.alertEnable)
+        await deleteAlert(device.alertUid)
+    }
     await mongoManager.updateDevice(user._id, {
       id: deviceId,
       protocol: req.body.protocol,
@@ -263,7 +286,9 @@ app.put('/devices/:id', async (req, res) => {
       sampleFrequency: req.body.sampleFrequency,
       minGasValue: req.body.minGasValue,
       maxGasValue: req.body.maxGasValue,
-      enablePerformanceMonitoring: req.body.enablePerformanceMonitoring
+      enablePerformanceMonitoring: req.body.enablePerformanceMonitoring,
+      alertEnable: req.body.alertEnable,
+      alertUid: alertRes.uid
     })
     // console.log(req.body)
     if(req.body.protocol === "HTTP")
@@ -286,6 +311,7 @@ app.delete('/devices/:id', async (req, res) => {
       for( let d of user.devices )
         if(d.id === deviceId){
           await deleteDashboard(d.dashboardUid)
+          await deleteAlert(d.alertUid)
           break;
         }
     } catch (err) {}
@@ -294,5 +320,30 @@ app.delete('/devices/:id', async (req, res) => {
   } catch (err) {
     console.log(err)
     res.status(401).send("invalid token")
+  }
+})
+
+app.post('/alerts', async (req, res) => {
+  console.log("NEW ALERT REQUEST")
+  try {
+    for(let alert of req.body.alerts){
+      const deviceId = alert.labels.deviceId
+      console.log(alert)
+      console.log(deviceId)
+      const userId = await mongoManager.findUserIdByDeviceId(deviceId)
+      const secondsSinceEpoch = Math.round(Date.now() / 1000)
+      await mongoManager.updateDevice(userId, {
+        id: deviceId,
+        lastAlertTime: secondsSinceEpoch,
+        lastAlert: alert.valueString
+      })
+      console.log(alert)
+    }
+    //updateDevice()
+    //console.log(req)
+    res.status(200).send()
+  } catch (err) {
+    console.log(err)
+    res.status(500).send()
   }
 })
