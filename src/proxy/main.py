@@ -33,16 +33,16 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     logging.info("Starting MQTT thread")
-    # mqtt_proxy = mqtt.MqttProxy()
-    # mqtt_thread = threading.Thread(target=mqtt_proxy.begin, args=(write_api_mqtt, INFLUXDB_BUCKET, INFLUXDB_ORG))
-    # mqtt_thread.daemon = True
-    # mqtt_thread.start()
+    mqtt_proxy = mqtt.MqttProxy()
+    mqtt_thread = threading.Thread(target=mqtt_proxy.begin, args=(write_api_mqtt, INFLUXDB_BUCKET, INFLUXDB_ORG))
+    mqtt_thread.daemon = True
+    mqtt_thread.start()
 
     logging.info("Starting CoAP thread")
-    coap_proxy = coap.CoapProxy()
-    coap_thread = threading.Thread(target=coap_proxy.begin, args=(write_api_coap, INFLUXDB_BUCKET, INFLUXDB_ORG))
-    coap_thread.daemon = True
-    coap_thread.start()
+    # coap_proxy = coap.CoapProxy()
+    # coap_thread = threading.Thread(target=coap_proxy.begin, args=(write_api_coap, INFLUXDB_BUCKET, INFLUXDB_ORG))
+    # coap_thread.daemon = True
+    # coap_thread.start()
 
     while True:
         time.sleep(10)

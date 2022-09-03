@@ -43,7 +43,7 @@ def persists(device_id, topic, value):
             p = P1("devices").tag("id", device_id).field(topic, float(value))
             write_api.write(bucket=INFLUXDB_BUCKET, org=INFLUXDB_ORG, record=p)
             logging.info(p)
-            print("OK")
+
             logging.basicConfig(level=logging.INFO)
 
             def on_connect(client, userdata, flags, rc):
@@ -60,7 +60,7 @@ def persists(device_id, topic, value):
                 msg.payload = outdoor
                 print("PayloadOUT: "+str(msg.payload))
                 persists(device_id,"outdoor", msg.payload)
-                time.sleep(1)#ogni 5 minuti
+                
 
 
 

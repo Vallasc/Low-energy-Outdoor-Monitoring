@@ -1,31 +1,21 @@
 # server.py
 
-import aiocoap.resource as resource
-import aiocoap
+import logging
 import asyncio
 
-class AlarmResource(resource.Resource):
-        """This resource supports the PUT method.
-        PUT: Update state of alarm."""
+from aiocoap import *
 
-        def __init__(self):
-            super().__init__()
-            self.state = "OFF"
+logging.basicConfig(level=logging.INFO)
 
-        async def render_put(self, request):
-            self.state = request.payload
-            print('Update alarm state: %s' % self.state)
+async def main():
+    context = await Context.create_client_context()
 
-            return aiocoap.Message(code=aiocoap.CHANGED, payload=self.state)
+    payload = b"The quick brown fox /jumps over/ the lazy dog.\n"
+    request = Message(code=PUT, payload=payload, uri="coap://192.168.1.229/devices")
 
-def main():
-        # Resource tree creation
-        root = resource.Site()
-        root.add_resource(['alarm'], AlarmResource())
+    response = await context.request(request).response
 
-        asyncio.Task(aiocoap.Context.create_server_context(root, bind=('0.0.0.0', 5683)))
+    print('Result: %s\n%r'%(response.code, response.payload))
 
-        asyncio.get_event_loop().run_forever()
-
-if __name__ == "__main__":
-        main()           
+# if name == "main":
+asyncio.run(main())          
