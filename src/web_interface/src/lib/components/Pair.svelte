@@ -191,16 +191,25 @@
                 Name: {deviceInit.name}
               </li>
               <li class="list-group-item">
+                Protocol: {deviceInit.protocol}
+              </li>
+              <li class="list-group-item">
+                Server: {deviceInit.host}
+              </li>
+              <li class="list-group-item">
+                Sample frequency: {deviceInit.sampleFrequency}s
+              </li>
+              <li class="list-group-item">
+                Config frequency: {deviceInit.configUpdateFrequency}s
+              </li>
+              <li class="list-group-item">
+                Wifi: {deviceInit.wifiSsid}
+              </li>
+              <li class="list-group-item">
                 Min gas value: {deviceInit.minGasValue}
               </li>
               <li class="list-group-item">
                 Max gas value: {deviceInit.maxGasValue}
-              </li>
-              <li class="list-group-item">
-                sampleFrequency: {deviceInit.sampleFrequency}
-              </li>
-              <li class="list-group-item">
-                Server: {deviceInit.host}
               </li>
             </ul>
           </div>
