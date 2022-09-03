@@ -14,6 +14,7 @@
   let maxGasValue = -1
   let enableMonitoring = false
   let enableAlert = false
+  let grafanaHost = window.location.protocol + "//" + window.location.hostname + ":3333"
 
   async function saveButton() {
     await putDevice(deviceId, {
@@ -122,7 +123,7 @@
           </tr>
           <tr>
             <th>Grafana dashboard</th>
-            <td><a href="http://192.168.1.229:3333{$selectedDevice.dashboardUrl}" target="_blank">link</a></td>
+            <td><a href="{grafanaHost}{$selectedDevice.dashboardUrl}" target="_blank">link</a></td>
           </tr>
           <tr class="divider"></tr>
           <tr class="divider"></tr>
