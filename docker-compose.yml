@@ -138,6 +138,7 @@ services:
             - MONGO_PASSWORD=${MONGO_PASSWORD}
             - MONGO_DB_NAME=${MONGO_DB_NAME}
             - MONGO_HOST=mongo
+            - TELEGRAM_HOST=telegram:8087
         healthcheck:
             test: ["CMD", "curl", "-f", "http://localhost:8888/"]
             interval: 60s
@@ -153,6 +154,46 @@ services:
             - influxdb
             - mosquitto
 
+    telegram:
+        build: ./src/telegram
+        ports:
+            - "8087:8087"
+        environment:
+            - LOMO_API_HOST=lomoapi:8888
+            - TELEGRAM_TOKEN=${TELEGRAM_API_KEY}
+            - MONGO_USERNAME=${MONGO_USERNAME}
+            - MONGO_PASSWORD=${MONGO_PASSWORD}
+            - MONGO_DB_NAME=${MONGO_DB_NAME}
+            - MONGO_HOST=mongo
+            - MONGO_PORT=27017
+        restart: always
+        networks: 
+            - internal
+        depends_on:
+            - mongo
+            - lomoapi
+    weather:
+        build: ./src/weather
+        environment:
+            - INFLUX_HOST=influxdb
+            - INFLUXDB_PORT=8086
+            - INFLUXDB_ORG=${INFLUXDB_ORG}
+            - INFLUXDB_BUCKET=${INFLUXDB_BUCKET}
+            - INFLUX_TOKEN=${INFLUXDB_ADMIN_TOKEN}
+            - MONGO_USERNAME=${MONGO_USERNAME}
+            - MONGO_PASSWORD=${MONGO_PASSWORD}
+            - MONGO_DB_NAME=${MONGO_DB_NAME}
+            - MONGO_HOST=mongo
+            - MONGO_PORT=27017
+            - API_KEY=${WEATHER_API_KERY}
+            - SLEEP_TIME=1800
+        restart: always
+        networks: 
+            - internal
+        depends_on:
+            - mongo
+            - influxdb
+            
     # https_proxy:
     #     image: 'jc21/nginx-proxy-manager:latest'
     #     restart: unless-stopped
