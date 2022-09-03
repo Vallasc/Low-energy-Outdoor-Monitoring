@@ -7,6 +7,7 @@
   import Signup from "./lib/routes/Signup.svelte"
   import Page404 from "./lib/routes/404.svelte"
   import Profile from "./lib/routes/Profile.svelte"
+  import Telegram from "./lib/routes/Telegram.svelte"
   import Devices from "./lib/routes/Devices.svelte"
   import Device from "./lib/routes/Device.svelte"
   import DeviceSettings from "./lib/routes/DeviceSettings.svelte"
@@ -68,6 +69,9 @@
         </Route>
         <Route path="/profile">
           <Profile/>
+        </Route>
+        <Route path="/telegram">
+          <Telegram/>
         </Route>
         <Route path="/signout">
           {signout()}
