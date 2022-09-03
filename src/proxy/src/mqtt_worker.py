@@ -31,6 +31,7 @@ class MqttProxyWorker:
                 .format(device=device_id, topic=msg.topic, payload=payload))
             device_user = self._mongo_client.get_device_user(device_id)
             self._mongo_client.set_lastseen_device(device_user['userId'], device_user['_id'])
+            self._mongo_client.set_last_values(device_user['userId'], device_user['_id'], p[0], p[1], p[2], p[3], p[4], p[5])
         except Exception as e:
             logging.error(e)
 

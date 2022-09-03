@@ -33,6 +33,8 @@ class HttpProxyWorker:
                 logging.info("MQTT influx write {device} -> {payload}" \
                         .format(device=id, payload=p))
                 self._mongo_client.set_lastseen_device(device_user['userId'], device_user['_id'])
+                self._mongo_client.set_last_values(device_user['userId'], device_user['_id'], p['temp'], p['hum'],
+                                                                                p['soil'], p['gas'], p['aqi'], p['rssi'])
             except Exception as e:
                 logging.error(e)
             return "", 200

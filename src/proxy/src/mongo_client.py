@@ -35,6 +35,17 @@ class MongoClient:
     def get_user(self, user_id):
         return self._user_collection.find_one({'_id': user_id })
 
+    def set_last_values(self, user_id, device_id, temp, hum, soil, gas, aqi, rssi):
+        self._user_collection.update_one({'_id': user_id, 'devices.id': device_id }, 
+                    { "$set": { 
+                        "devices.$.lastTempValue": float(temp),
+                        "devices.$.lastHumidityValue": float(hum),
+                        "devices.$.lastGasValue": float(gas),
+                        "devices.$.lastSoilValue": float(soil),
+                        "devices.$.lastAqiValue": float(aqi),
+                        "devices.$.lastRssiValue": float(rssi)
+                    } })
+
     def set_lastseen_device(self, user_id, device_id):
         epoch_time = int(time.time())
         self._user_collection.update_one({'_id': user_id, 'devices.id': device_id }, { "$set": { "devices.$.lastSeen": epoch_time } })
