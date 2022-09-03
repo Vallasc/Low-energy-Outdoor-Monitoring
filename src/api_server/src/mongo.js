@@ -38,7 +38,13 @@ export class MongoManager {
     httpMeanTime: Number,
     alertEnable: Boolean,
     lastAlertTime: Number,
-    lastAlert: String
+    lastAlert: String,
+    lastTempValue: Number,
+    lastHumidityValue: Number,
+    lastGasValue: Number,
+    lastSoilValue: Number,
+    lastAqiValue: Number,
+    lastRssiValue: Number
   }
 
   Users = mongoose.model('Users', mongoose.Schema({
@@ -48,6 +54,7 @@ export class MongoManager {
     salt: String,
     garfanaId: Number,
     garfanaFolderUid: String,
+    telegramToken: String,
     devices: [this.Device]
   }, { _id: false }))
 
