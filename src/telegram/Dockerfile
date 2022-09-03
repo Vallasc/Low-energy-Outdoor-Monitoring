@@ -8,6 +8,6 @@ COPY . .
 # Install app dependencies
 RUN pip install -r requirements.txt
 
-EXPOSE 8084
+EXPOSE 8087
 
 CMD python ./src/main.py
