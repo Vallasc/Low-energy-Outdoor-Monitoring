@@ -5,6 +5,7 @@ interface User {
     email: string
     password?: string
     devices?: Array<Device>
+    telegramToken?: string
 }
 
 interface Device {
@@ -36,5 +37,11 @@ interface Device {
     httpMeanTime?: number,
     alertEnable?: boolean,
     lastAlertTime?: number,
-    lastAlert?: string
+    lastAlert?: string,
+    lastTempValue: number,
+    lastHumidityValue: number,
+    lastGasValue: number,
+    lastSoilValue: number,
+    lastAqiValue: number,
+    lastRssiValue: number
 }
