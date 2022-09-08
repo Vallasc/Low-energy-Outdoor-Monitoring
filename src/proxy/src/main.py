@@ -4,7 +4,7 @@ import time
 
 from http_worker import HttpProxyWorker
 from mqtt_worker import MqttProxyWorker
-from device_config_worker import DeviceConfigProxyWorker
+from udp_worker import UDPWorker
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
@@ -21,11 +21,11 @@ if __name__ == "__main__":
     http_thread.daemon = True
     http_thread.start()
 
-    logging.info("Starting config thread")
-    device_config = DeviceConfigProxyWorker()
-    device_config_thread = threading.Thread(target=device_config.begin)
-    device_config_thread.daemon = True
-    device_config_thread.start()
+    logging.info("Starting udp thread")
+    udp_worker = UDPWorker()
+    udp_worker_thread = threading.Thread(target=udp_worker.begin)
+    udp_worker_thread.daemon = True
+    udp_worker_thread.start()
 
     while True:
         time.sleep(10)
