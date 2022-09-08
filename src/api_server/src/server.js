@@ -277,7 +277,10 @@ app.post('/devices', async (req, res) => {
       lastGasValue: -1,
       lastSoilValue: -1,
       lastAqiValue: -1,
-      lastRssiValue: -1
+      lastRssiValue: -1,
+      enablePrediction: false,
+      trainingTime: 30,
+      predictionTime: 10
     }
     const id = await mongoManager.createDevice(user._id, device)
     const grafanaDashboardRes = await createDashboard(user.garfanaId, user.garfanaFolderUid, id)
@@ -324,10 +327,13 @@ app.put('/devices/:id', async (req, res) => {
       maxGasValue: req.body.maxGasValue,
       enablePerformanceMonitoring: req.body.enablePerformanceMonitoring,
       alertEnable: req.body.alertEnable,
-      alertUid: alertRes.uid
+      alertUid: alertRes.uid,
+      enablePrediction: req.body.enablePrediction,
+      trainingTime: req.body.trainingTime,
+      predictionTime: req.body.predictionTime
     })
     // console.log(req.body)
-    if(req.body.protocol === "HTTP")
+    if(req.body.protocol !== "MQTT")
       disableClient(deviceId)
     else
       enableClient(deviceId)
@@ -351,8 +357,10 @@ app.delete('/devices/:id', async (req, res) => {
           break;
         }
     } catch (err) {}
+    try {
+      await axios.delete("http://" + TELEGRAM_HOST + "/users/" + user._id)
+    } catch (err) {}
     mongoManager.deleteDevice(user._id, deviceId)
-    await axios.delete("http://" + TELEGRAM_HOST + "/users/" + user._id)
     res.status(200).send()
   } catch (err) {
     console.log(err)

@@ -44,7 +44,10 @@ export class MongoManager {
     lastGasValue: Number,
     lastSoilValue: Number,
     lastAqiValue: Number,
-    lastRssiValue: Number
+    lastRssiValue: Number,
+    enablePrediction: Boolean,
+    trainingTime: Number,
+    predictionTime: Number
   }
 
   Users = mongoose.model('Users', mongoose.Schema({
@@ -99,7 +102,10 @@ export class MongoManager {
             "devices.$.alertEnable": device.alertEnable,
             "devices.$.alertUid": device.alertUid,
             "devices.$.lastAlertTime": device.lastAlertTime,
-            "devices.$.lastAlert": device.lastAlert
+            "devices.$.lastAlert": device.lastAlert,
+            "devices.$.enablePrediction": device.enablePrediction,
+            "devices.$.trainingTime": device.trainingTime,
+            "devices.$.predictionTime": device.predictionTime
         }
       }
     )
