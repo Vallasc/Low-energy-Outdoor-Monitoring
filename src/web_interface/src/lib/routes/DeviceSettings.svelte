@@ -6,7 +6,7 @@
 
   export let deviceId = ''
 
-  const PROTOCOL_TYPES = ["MQTT", "HTTP"]
+  const PROTOCOL_TYPES = ["MQTT", "HTTP", "UDP"]
 
   let protocol = ''
   let sampleFrequency = -1
