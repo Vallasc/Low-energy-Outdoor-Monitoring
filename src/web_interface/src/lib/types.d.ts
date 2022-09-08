@@ -43,5 +43,8 @@ interface Device {
     lastGasValue: number,
     lastSoilValue: number,
     lastAqiValue: number,
-    lastRssiValue: number
+    lastRssiValue: number,
+    enablePrediction: boolean,
+    trainingTime: number,
+    predictionTime: number
 }
