@@ -193,6 +193,26 @@ services:
         depends_on:
             - mongo
             - influxdb
+
+    forecast:
+        build: ./src/forecast
+        environment:
+            - INFLUX_HOST=influxdb
+            - INFLUXDB_PORT=8086
+            - INFLUXDB_ORG=${INFLUXDB_ORG}
+            - INFLUXDB_BUCKET=${INFLUXDB_BUCKET}
+            - INFLUX_TOKEN=${INFLUXDB_ADMIN_TOKEN}
+            - MONGO_USERNAME=${MONGO_USERNAME}
+            - MONGO_PASSWORD=${MONGO_PASSWORD}
+            - MONGO_DB_NAME=${MONGO_DB_NAME}
+            - MONGO_HOST=mongo
+            - MONGO_PORT=27017
+        restart: always
+        networks: 
+            - internal
+        depends_on:
+            - mongo
+            - influxdb
             
     # https_proxy:
     #     image: 'jc21/nginx-proxy-manager:latest'
