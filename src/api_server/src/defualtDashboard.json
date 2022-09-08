@@ -1,4 +1,81 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_INFLUXDB",
+      "label": "InfluxDB",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "panel",
+      "id": "bargauge",
+      "name": "Bar gauge",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "gauge",
+      "name": "Gauge",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "geomap",
+      "name": "Geomap",
+      "version": ""
+    },
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "9.0.4"
+    },
+    {
+      "type": "datasource",
+      "id": "influxdb",
+      "name": "InfluxDB",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
@@ -14,6 +91,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
+            "fixedColor": "green",
             "mode": "palette-classic"
           },
           "custom": {
@@ -21,7 +99,7 @@
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
-            "fillOpacity": 80,
+            "fillOpacity": 10,
             "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
@@ -32,7 +110,7 @@
             "lineStyle": {
               "fill": "solid"
             },
-            "lineWidth": 2,
+            "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
@@ -66,20 +144,22 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 10,
-        "w": 8,
+        "h": 9,
+        "w": 15,
         "x": 0,
         "y": 0
       },
       "id": 4,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "hidden",
+          "calcs": [
+            "last"
+          ],
+          "displayMode": "table",
           "placement": "bottom"
         },
         "tooltip": {
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
@@ -91,77 +171,20 @@
           },
           "query": "from(bucket: \"lomo\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"id\"] == \"${deviceId}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"temp\")",
           "refId": "A"
-        }
-      ],
-      "title": "Temperature",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "influxdb",
-        "name": "InfluxDB"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "max": 100,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "green",
-                "value": 30
-              },
-              {
-                "color": "blue",
-                "value": 70
-              }
-            ]
-          },
-          "unit": "percent"
         },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 10,
-        "w": 3,
-        "x": 8,
-        "y": 0
-      },
-      "id": 8,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true
-      },
-      "pluginVersion": "9.0.4",
-      "targets": [
         {
           "datasource": {
             "type": "influxdb",
             "name": "InfluxDB"
           },
-          "query": "from(bucket: \"lomo\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"id\"] == \"${deviceId}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"soil\")",
-          "refId": "A"
+          "hide": false,
+          "query": "from(bucket: \"lomo\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"id\"] == \"${deviceId}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"forecasted_temp\")",
+          "refId": "B"
         }
       ],
-      "title": "Soil",
-      "type": "gauge"
+      "title": "Temperature",
+      "transformations": [],
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -198,9 +221,9 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 10,
-        "w": 4,
-        "x": 11,
+        "h": 7,
+        "w": 9,
+        "x": 15,
         "y": 0
       },
       "id": 10,
@@ -281,12 +304,141 @@
             "name": "InfluxDB"
           },
           "hide": false,
-          "query": "import \"strings\"\r\n\r\nfrom(bucket: \"lomo\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"id\"] == \"${deviceId}\")\r\n  |> group(columns: [\"lat_lon\"])\r\n  |> distinct(column: \"lat_lon\")\r\n  |> map(fn: (r) => {\r\n    parts = strings.split(v: r._value, t: \",\")\r\n    return {lat: parts[0], lon: parts[1]}\r\n  })",
+          "query": "import \"strings\"\r\n\r\nfrom(bucket: \"lomo\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"id\"] == \"${deviceId}\")\r\n |> filter(fn: (r) => r[\"_field\"] == \"temp\")\r\n |> group(columns: [\"lat_lon\"])\r\n  |> distinct(column: \"lat_lon\")\r\n  |> map(fn: (r) => {\r\n    parts = strings.split(v: r._value, t: \",\")\r\n    return {lat: parts[0], lon: parts[1]}\r\n  })",
           "refId": "A"
         }
       ],
       "title": "Position",
       "type": "geomap"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "name": "InfluxDB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "max": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 4,
+        "x": 15,
+        "y": 7
+      },
+      "id": 8,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.0.4",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "name": "InfluxDB"
+          },
+          "query": "from(bucket: \"lomo\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"id\"] == \"${deviceId}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"aqi\")",
+          "refId": "A"
+        }
+      ],
+      "title": "AQI",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "name": "InfluxDB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 20
+              },
+              {
+                "color": "blue",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 5,
+        "x": 19,
+        "y": 7
+      },
+      "id": 15,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "9.0.4",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "name": "InfluxDB"
+          },
+          "query": "from(bucket: \"lomo\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"id\"] == \"${deviceId}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"soil\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Soil",
+      "type": "gauge"
     },
     {
       "datasource": {
@@ -303,27 +455,27 @@
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
-            "fillOpacity": 80,
+            "fillOpacity": 10,
             "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
             },
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineStyle": {
               "fill": "solid"
             },
-            "lineWidth": 2,
+            "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
             },
             "showPoints": "auto",
-            "spanNulls": true,
+            "spanNulls": false,
             "stacking": {
               "group": "A",
-              "mode": "normal"
+              "mode": "none"
             },
             "thresholdsStyle": {
               "mode": "off"
@@ -334,7 +486,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "purple",
+                "color": "green",
                 "value": null
               },
               {
@@ -345,35 +497,21 @@
           },
           "unit": "percent"
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "hum {id=\"${deviceId}\", lat_lon=\"44.493612,11.324391\"}"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "blue",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
-        "h": 11,
-        "w": 8,
+        "h": 9,
+        "w": 15,
         "x": 0,
-        "y": 10
+        "y": 9
       },
-      "id": 6,
+      "id": 12,
       "options": {
         "legend": {
-          "calcs": [],
-          "displayMode": "hidden",
+          "calcs": [
+            "last"
+          ],
+          "displayMode": "table",
           "placement": "bottom"
         },
         "tooltip": {
@@ -389,9 +527,285 @@
           },
           "query": "from(bucket: \"lomo\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"id\"] == \"${deviceId}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"hum\")",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "name": "InfluxDB"
+          },
+          "hide": false,
+          "query": "from(bucket: \"lomo\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"id\"] == \"${deviceId}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"forecasted_hum\")",
+          "refId": "B"
         }
       ],
       "title": "Humidity",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "name": "InfluxDB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-RdYlGr"
+          },
+          "mappings": [],
+          "max": 0,
+          "min": -150,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "dBm"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 9,
+        "x": 15,
+        "y": 14
+      },
+      "id": 14,
+      "options": {
+        "displayMode": "lcd",
+        "minVizHeight": 10,
+        "minVizWidth": 0,
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "pluginVersion": "9.0.4",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "name": "InfluxDB"
+          },
+          "query": "from(bucket: \"lomo\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"id\"] == \"${deviceId}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"rssi\")",
+          "refId": "A"
+        }
+      ],
+      "title": "RSSI",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "name": "InfluxDB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 13,
+        "x": 0,
+        "y": 18
+      },
+      "id": 13,
+      "options": {
+        "legend": {
+          "calcs": [
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "name": "InfluxDB"
+          },
+          "query": "from(bucket: \"lomo\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"id\"] == \"${deviceId}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"gas\")",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "name": "InfluxDB"
+          },
+          "hide": false,
+          "query": "from(bucket: \"lomo\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"id\"] == \"${deviceId}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"forecasted_gas\")",
+          "refId": "B"
+        }
+      ],
+      "title": "Air quality",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "name": "InfluxDB"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 11,
+        "x": 13,
+        "y": 18
+      },
+      "id": 16,
+      "options": {
+        "legend": {
+          "calcs": [
+            "last"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "name": "InfluxDB"
+          },
+          "query": "from(bucket: \"lomo\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"id\"] == \"${deviceId}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"soil\")",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "name": "InfluxDB"
+          },
+          "hide": false,
+          "query": "from(bucket: \"lomo\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"id\"] == \"${deviceId}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"forecasted_soil\")",
+          "refId": "B"
+        }
+      ],
+      "title": "Soil moisture",
       "type": "timeseries"
     }
   ],
@@ -399,8 +813,16 @@
   "schemaVersion": 36,
   "style": "dark",
   "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-9h",
+    "to": "now+3h"
+  },
   "timepicker": {},
   "timezone": "browser",
-  "title": "default",
-  "version": 1
+  "title": "Device-${deviceId}",
+  "version": 1,
+  "weekStart": ""
 }
