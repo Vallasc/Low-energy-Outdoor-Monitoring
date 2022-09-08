@@ -23,9 +23,8 @@ class InfluxClient:
         self._write_api = self._client.write_api(write_options=SYNCHRONOUS)
         logging.basicConfig(level=logging.INFO)
         
-    def save_record(self, device_id, lat_lon, temp):
+    def save_record(self, device_id, temp):
         p = Point("devices") \
             .tag(ID_TAG, device_id)             \
-            .tag(LAT_LON_TAG, lat_lon)          \
             .field(OUT_TEMP_FIELD, float(temp))
         self._write_api.write(bucket=INFLUXDB_BUCKET, org=INFLUXDB_ORG, record=p)
