@@ -17,7 +17,7 @@ class MongoClient:
         self._deviceuser_collection = self._db["devicesusers"]
         self._user_collection = self._db["users"]
         
-    def get_device_user(self, id, token):
+    def get_device_user_token(self, id, token):
         return self._deviceuser_collection.find_one({'_id': id, 'token': token})
     
     def get_device_user(self, id):
