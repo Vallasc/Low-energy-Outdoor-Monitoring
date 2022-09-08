@@ -32,6 +32,13 @@ class MongoClient:
                     return (user, device)
         return (None, None)
 
+    def get_device(self, userd_id, device_id):
+        user = self.get_user(userd_id)
+        for device in user["devices"]:
+            if device['id'] == device_id:
+                return device
+        return None
+
     def get_user(self, user_id):
         return self._user_collection.find_one({'_id': user_id })
 

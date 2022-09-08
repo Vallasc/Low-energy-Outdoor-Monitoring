@@ -39,4 +39,29 @@ class HttpProxyWorker:
                 logging.error(e)
             return "", 200
 
+        @self._app.route("/devices/<id>/config", methods = ['GET'])
+        def put_sensors(id):
+            bearer = request.headers.get('Authorization')
+            token = bearer.split()[1]
+
+            p = json.loads(request.data.decode("utf-8"))
+            device_user = self._mongo_client.get_device_user(id, token)
+            if device_user is None:
+                return "unauthorized", 401
+
+            try:
+                device = self._mongo_client.get_device(device_user['userId'], id)
+                conf = {}
+                conf['protocol'] = device['protocol']
+                conf['sampleFrequency'] = device['sampleFrequency']
+                conf['configUpdateFrequency'] = device['configUpdateFrequency']
+                conf['minGasValue'] = device['minGasValue']
+                conf['maxGasValue'] = device['maxGasValue']
+                conf['latitude'] = device['latitude']
+                conf['longitude'] = device['longitude']
+                conf['enablePerformanceMonitoring'] = device['enablePerformanceMonitoring']
+            except Exception as e:
+                logging.error(e)
+            return json.dumps(conf), 200
+
         serve(self._app, host="0.0.0.0", port=int(HTTP_PORT))
