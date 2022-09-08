@@ -7,7 +7,6 @@
 #include "config.h"
 
 #define MQTT_PUB_QOS 3
-#define MQTTsubQos 1
 
 // /devies/foo
 #define MAIN_MQTT_TOPIC "devices"
@@ -18,20 +17,20 @@ public:
   MQTTManager(WiFiClient* _wifiClient, const char* _host, int port, const char* _device_id, const char* _token)
   {
     client = new PubSubClient(*_wifiClient);
-    strcpy(host, _host);
+    strncpy(host, _host, sizeof(host));
     client->setServer(host, port);
-    strcpy(device_id, _device_id);
-    strcpy(token, _token);
+    strncpy(device_id, _device_id, sizeof(device_id));
+    strncpy(token, _token, sizeof(token));
     snprintf(full_topic, sizeof(full_topic), "%s/%s", MAIN_MQTT_TOPIC, device_id);
   }
 
   MQTTManager(WiFiClient* _wifiClient, const char* _host, int port, const char* _device_id, const char* _token, std::function<void(char*, uint8_t*, unsigned int)> _callback)
   {
     client = new PubSubClient(*_wifiClient);
-    strcpy(host, _host);
+    strncpy(host, _host, sizeof(host));
     client->setServer(host, port);
-    strcpy(device_id, _device_id);
-    strcpy(token, _token);
+    strncpy(device_id, _device_id, sizeof(device_id));
+    strncpy(token, _token, sizeof(token));
     snprintf(full_topic, sizeof(full_topic), "%s/%s", MAIN_MQTT_TOPIC, device_id);
     callback = _callback;
   }
