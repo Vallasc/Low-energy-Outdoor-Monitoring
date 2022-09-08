@@ -2,6 +2,7 @@
   import { selectedDevice, user } from "../../stores";
   import { getUser, putDevice, deleteDevice } from '../logic'
   import { navigate } from "svelte-navigator"
+  import { fade } from 'svelte/transition'
 
   export let deviceId = ''
 
@@ -14,7 +15,10 @@
   let maxGasValue = -1
   let enableMonitoring = false
   let enableAlert = false
+  let enablePrediction = false
   let grafanaHost = window.location.protocol + "//" + window.location.hostname + ":3333"
+  let trainingTime = 10
+  let predictionTime = 10
 
   async function saveButton() {
     await putDevice(deviceId, {
@@ -24,7 +28,10 @@
       minGasValue: minGasValue,
       maxGasValue: maxGasValue,
       enablePerformanceMonitoring: enableMonitoring,
-      alertEnable: enableAlert
+      alertEnable: enableAlert,
+      enablePrediction: enablePrediction,
+      trainingTime: trainingTime,
+      predictionTime: predictionTime
     })
     await init()
   }
@@ -42,6 +49,9 @@
     maxGasValue = $selectedDevice.maxGasValue
     enableMonitoring = $selectedDevice.enablePerformanceMonitoring
     enableAlert = $selectedDevice.alertEnable
+    enablePrediction = $selectedDevice.enablePrediction
+    trainingTime = $selectedDevice.trainingTime
+    predictionTime = $selectedDevice.predictionTime
   }
 
   function updateSampleFrequencyParams(){
@@ -75,7 +85,7 @@
 </div>
 <div class="row">
   <div class="column">
-    <div class="block">
+    <div class="block" in:fade = {{delay: 100, duration: 200}}>
       <h5>Configuration</h5>
       <table class="table align-middle table-striped">
         <thead>
@@ -95,7 +105,8 @@
           </tr>
           <tr>
             <th>Last seen</th>
-            <td>{$selectedDevice.lastSeen}</td>
+            <td>{ new Date($selectedDevice.lastSeen * 1000).toDateString()} 
+              {(new Date($selectedDevice.lastSeen * 1000)).getHours()}:{(new Date($selectedDevice.lastSeen * 1000)).getMinutes()}</td>
           </tr>
           <tr>
             <th>Latitude</th>
@@ -141,11 +152,11 @@
           </tr>
           <tr>
             <th>Config update frequency</th>
-            <td><input class="form-control" bind:value={configUpdateFrequency}  type="number" step="1" min="1" max="60" on:change={updateSampleFrequencyParams}></td>
+            <td><input class="form-control" bind:value={configUpdateFrequency}  type="number" step="1" min="1" max="60" on:change={updateSampleFrequencyParams}>minutes</td>
           </tr>
           <tr>
             <th>Sample frequency</th>
-            <td><input id="range" class="form-control" bind:value={sampleFrequency}  type="number" step="{configUpdateFrequency}" min="{configUpdateFrequency}" max="120"></td>
+            <td><input id="range" class="form-control" bind:value={sampleFrequency}  type="number" step="{configUpdateFrequency}" min="{configUpdateFrequency}" max="120">minutes</td>
           </tr>
           <tr>
             <th>Min gas value</th>
@@ -160,7 +171,7 @@
     </div>
   </div>
   <div class="column">
-    <div class="block">
+    <div class="block" in:fade = {{delay: 200, duration: 200}}>
       <h5>Performance</h5>
       <div class="form-check">
         <input class="form-check-input" type="checkbox" value="" id="check-perf" bind:checked = {enableMonitoring}>
@@ -192,7 +203,7 @@
         </table>
       {/if}
     </div>
-    <div class="block">
+    <div class="block" in:fade = {{delay: 300, duration: 200}}>
       <h5>Alert</h5>
       <div class="form-check">
         <input class="form-check-input" type="checkbox" value="" id="check-perf" bind:checked = {enableAlert}>
@@ -210,40 +221,58 @@
           </thead>
           <tbody>
             <tr>
-              <td>{$selectedDevice.lastAlertTime}</td>
-              <td>{$selectedDevice.lastAlert}</td>
+              {#if $selectedDevice.lastAlertTime > 0 }
+                <td>{ new Date($selectedDevice.lastAlertTime * 1000).toDateString()} 
+                  {(new Date($selectedDevice.lastAlertTime * 1000)).getHours()}:{(new Date($selectedDevice.lastAlertTime * 1000)).getMinutes()}</td>
+              {:else}
+                <td>None</td>
+              {/if}
+              {#if $selectedDevice.lastAlertTime > 0 }
+                <td>AQI value = 2</td>
+              {:else}
+                <td>None</td>
+              {/if}
             </tr>
           </tbody>
         </table>
       {/if}
     </div>
-    <div class="block">
+    <div class="block" in:fade = {{delay: 400, duration: 200}}>
       <h5>Prediction</h5>
-      <table class="table align-middle table-striped">
-        <thead>
-          <tr>
-            <th>Bo</th>
-            <th>Bo</th>
-            <th>Bo</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th> Mean Square Error (MSE)</th>
-            <td>0</td>
-            <td>0</td>
-          </tr>
-          <tr>
-            <th>Bo</th>
-            <td>0</td>
-            <td>0</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="check-pred" bind:checked = {enablePrediction}>
+        <label class="form-check-label" for="check-pred">
+          Enable prediction
+        </label>
+      </div>
+      {#if enablePrediction}
+        <table class="table align-middle table-striped">
+          <thead>
+            <tr>
+              <th>Key</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Training set time</th>
+              <td><input id="range" class="form-control" bind:value={trainingTime}  type="number" step="1" min="1" max="5000">minutes</td>
+            </tr>
+            <tr>
+              <th>Prediction time</th>
+              <td><input id="range" class="form-control" bind:value={predictionTime}  type="number" step="1" min="1" max="5000">minutes</td>
+            </tr>
+            <tr>
+              <th> Mean Square Error (MSE)</th>
+              <td>0</td>
+            </tr>
+          </tbody>
+        </table>
+      {/if}
     </div>
   </div>
 </div>
-<div class="row">
+<div class="row" in:fade = {{delay: 500, duration: 200}}>
   <button class="w-100 mb-3 btn btn-primary" type="submit" on:click={saveButton}>Save settings</button>
   <button class="w-100 mb-3 btn btn-danger" type="submit" on:click={deleteButton}>DELETE DEVICE</button>
 </div>
@@ -251,6 +280,10 @@
   .table td, .table th {
     padding: 10px;
     margin: 16px;
+  }
+
+  .table td {
+    width: 300px;
   }
   .table {
     background-color: #fff;
@@ -282,10 +315,16 @@
     font-size: 0.875rem;
     font-weight: 200;
     letter-spacing: 1px;
+    width: 100px;
+    display: inline;
   }
 
   button {
     max-width: 300px;
     margin: 50px;
+  }
+
+  h3:focus {
+    outline: none;
   }
 </style>
