@@ -35,8 +35,18 @@
       <DeviceCard>
         <div slot="title">{device.name}</div>
         <div slot="body">
-          Active: True<br>
-          Last seen: 10 min ago<br>
+          {#if ((new Date()).getTime() - device.configUpdateFrequency * 60 * 1000 * 3) > (device.lastSeen * 1000)}
+            <div style="display:flex;">Active:&nbsp;&nbsp;<div style="color:red;">⬤</div></div>
+          {:else}
+            <div style="display:flex;">Active:&nbsp;&nbsp;<div style="color:green;">⬤</div></div>
+          {/if}
+          {#if (new Date()).getTime() - (device.lastSeen * 1000) <= 60 * 1000 * 120 }
+            Last seen: {Math.round(((new Date()).getTime() - (device.lastSeen * 1000))/ 60000)} min ago<br>
+          {:else if (new Date()).getTime() - (device.lastSeen * 1000) <= 60 * 1000 * 60 * 24 }
+            Last seen: {Math.round(((new Date()).getTime() - (device.lastSeen * 1000))/ 1200000)} hours ago<br>
+          {:else}
+            Last seen: {(new Date(device.lastSeen * 1000)).toDateString()}<br>
+          {/if}
           Protocol: {device.protocol}<br>
           <button type="button" class="btn mt-3 btn-outline-primary w-100" on:click={() => openDevice(device)}>
             View

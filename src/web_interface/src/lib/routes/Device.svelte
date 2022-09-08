@@ -38,4 +38,8 @@
     width: 100%;
     height: calc(100% - 85px);
   }
+
+  h3:focus {
+    outline: none;
+  }
 </style>
