@@ -6,5 +6,4 @@ export const PROTOCOL = process.env.PROTOCOL || "MQTT"
 export const PROXY_PORT = process.env.PROXY_PORT || 8082
 export const MQTT_PORT = process.env.MQTT_PORT || 1883
 export const UDP_PORT = process.env.UDP_PORT || 9090
-
 export const ENABLE_PERFORMANCE = process.env.ENABLE_PERFORMANCE || false
