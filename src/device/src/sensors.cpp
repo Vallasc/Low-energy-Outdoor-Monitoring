@@ -46,26 +46,16 @@ float Sensors::get_gas()
 }
 
 
-int Sensors::get_aqi(){    
-  // Serial.println("Value i");
-  // Serial.println(aqi_index);
-
+int Sensors::get_aqi()
+{    
   v[aqi_index] = get_gas();
-  
-  // Serial.println("Value v[i]:");
-  // Serial.println(v[aqi_index]);
-
   aqi_index = (aqi_index + 1) % 5;
 
   if(v[4] == -1.0)
     return aqi;
 
   int sum = v[0] + v[1]+ v[2] + v[3] + v[4];
-  // Serial.println("Sum:");
-  // Serial.println(sum);
   int avg = sum/(5);
-  // Serial.println("Mean:");
-  // Serial.println(media);
 
   if(avg >= max_gas_value)
     aqi = 0;
@@ -73,11 +63,7 @@ int Sensors::get_aqi(){
     aqi = 1;
   else
     aqi = 2;
-
-  // Serial.println("AQI:");
-  // Serial.println(aqi);
-
  return aqi;
- }
+}
 
   

@@ -2,7 +2,6 @@
 #define STATE_H
 
 #include <Preferences.h>
-#include "debug_config.h"
 
 #define KEY_DEVICE_CONFIGURED "CONF" // bool
 #define KEY_DEVICE_ID "ID" // String
@@ -104,32 +103,6 @@ namespace
     PERFORMANCE_MONITORING = preferences.getBool(KEY_PERF, false);
     close_preferences();
   }
-
-
-  static void load_debug_config()
-  {
-    open_preferences();
-    preferences.putBool(KEY_DEVICE_CONFIGURED, DEBUG_DEVICE_CONFIGURED);
-    preferences.putString(KEY_DEVICE_ID, DEBUG_DEVICE_ID);
-    preferences.putString(KEY_DEVICE_NAME, DEBUG_DEVICE_NAME);
-    preferences.putString(KEY_PROTOCOL_TYPE, DEBUG_PROTOCOL_TYPE);
-    preferences.putInt(KEY_SAMPLE_FREQUENCY, DEBUG_SAMPLE_FREQUENCY);
-    preferences.putInt(KEY_CONFIG_FREQUENCY, DEBUG_CONFIG_FREQUENCY);
-    preferences.putInt(KEY_MIN_GAS_VALUE, DEBUG_MIN_GAS_VALUE);
-    preferences.putInt(KEY_MAX_GAS_VALUE, DEBUG_MAX_GAS_VALUE);
-    preferences.putInt(KEY_PROXY_PORT, DEBUG_PROXY_PORT);
-    preferences.putInt(KEY_MQTT_PORT, DEBUG_MQTT_PORT);
-    preferences.putInt(KEY_CONFIG_PORT, DEBUG_CONFIG_PORT);
-    preferences.putString(KEY_HOST, DEBUG_HOST);
-    preferences.putString(KEY_TOKEN, DEBUG_TOKEN);
-    preferences.putString(KEY_WIFI_SSID, DEBUG_WIFI_SSID);
-    preferences.putString(KEY_WIFI_PASS, DEBUG_WIFI_PASS);
-    preferences.putDouble(KEY_LAT, DEBUG_LAT);
-    preferences.putDouble(KEY_LON, DEBUG_LONG);
-    preferences.putBool(KEY_PERF, DEBUG_KEY_PERF);
-    close_preferences();
-  }
-
 
   static void reset_pref()
   {

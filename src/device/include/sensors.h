@@ -8,7 +8,7 @@
 #define SOIL_HIGH 1100
 
 #define GAS_LOW 0
-#define GAS_HIGH 2000
+#define GAS_HIGH 900
 
 class Sensors {
   public:
