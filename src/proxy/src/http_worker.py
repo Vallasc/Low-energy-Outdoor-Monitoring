@@ -24,33 +24,45 @@ class HttpProxyWorker:
             token = bearer.split()[1]
 
             p = json.loads(request.data.decode("utf-8"))
-            device_user = self._mongo_client.get_device_user(id, token)
+            device_user = self._mongo_client.get_device_user_token(id, token)
             if device_user is None:
                 return "unauthorized", 401
 
             try:
                 self._influx.save_record(id, p['latLong'], p['temp'], p['hum'], p['soil'], p['gas'], p['aqi'], p['rssi'])
-                logging.info("MQTT influx write {device} -> {payload}" \
-                        .format(device=id, payload=p))
+                logging.info("HTTP influx write {device} -> {payload}".format(device=id, payload=p))
                 self._mongo_client.set_lastseen_device(device_user['userId'], device_user['_id'])
                 self._mongo_client.set_last_values(device_user['userId'], device_user['_id'], p['temp'], p['hum'],
                                                                                 p['soil'], p['gas'], p['aqi'], p['rssi'])
+                # Send device config
+                device = self._mongo_client.get_device(device_user['userId'], id)
+                conf = {}
+                conf['protocol'] = device['protocol']
+                conf['sampleFrequency'] = device['sampleFrequency']
+                conf['configUpdateFrequency'] = device['configUpdateFrequency']
+                conf['minGasValue'] = device['minGasValue']
+                conf['maxGasValue'] = device['maxGasValue']
+                conf['latitude'] = device['latitude']
+                conf['longitude'] = device['longitude']
+                conf['enablePerformanceMonitoring'] = device['enablePerformanceMonitoring']
             except Exception as e:
                 logging.error(e)
-            return "", 200
+            return json.dumps(conf), 200
 
-        @self._app.route("/devices/<id>/config", methods = ['GET'])
-        def put_sensors(id):
+        @self._app.route("/devices/<id>/config", methods = ['PUT'])
+        def get_config(id):
             bearer = request.headers.get('Authorization')
             token = bearer.split()[1]
 
-            p = json.loads(request.data.decode("utf-8"))
-            device_user = self._mongo_client.get_device_user(id, token)
+            payload = json.loads(request.data.decode("utf-8"))
+            device_user = self._mongo_client.get_device_user_token(id, token)
             if device_user is None:
                 return "unauthorized", 401
-
+            
+            logging.info("HTTP get config {device} -> {payload}".format(device=id, payload=payload))
             try:
                 device = self._mongo_client.get_device(device_user['userId'], id)
+                self._mongo_client.set_device_values(device_user['userId'], device["id"], payload)
                 conf = {}
                 conf['protocol'] = device['protocol']
                 conf['sampleFrequency'] = device['sampleFrequency']
