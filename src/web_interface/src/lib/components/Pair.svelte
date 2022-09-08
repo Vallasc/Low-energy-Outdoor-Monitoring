@@ -130,7 +130,7 @@
           </div>
           <div class="mb-3">
             <input
-              type="text"
+              type="password"
               class="form-control"
               placeholder="WiFi Password"
               bind:value={password}
@@ -197,10 +197,10 @@
                 Server: {deviceInit.host}
               </li>
               <li class="list-group-item">
-                Sample frequency: {deviceInit.sampleFrequency}s
+                Sample frequency: {deviceInit.sampleFrequency} minutes
               </li>
               <li class="list-group-item">
-                Config frequency: {deviceInit.configUpdateFrequency}s
+                Config frequency: {deviceInit.configUpdateFrequency} minutes
               </li>
               <li class="list-group-item">
                 Wifi: {deviceInit.wifiSsid}
