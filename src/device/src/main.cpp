@@ -20,6 +20,8 @@
 RTC_DATA_ATTR unsigned long boot_count = 0;
 RTC_DATA_ATTR unsigned long last_config_frequency = -1;
 RTC_DATA_ATTR unsigned long last_sample_frequency = -1;
+RTC_DATA_ATTR float avg_arr[5];
+RTC_DATA_ATTR int aqi_index = 0;
 
 InitServer init_tasks;
 
@@ -82,8 +84,12 @@ void setup() {
     init_evaluation_vars();
 
   // Force config on first boot
-  if(boot_count == 0) 
+  if(boot_count == 0)
+  {
     boot_count = CONFIG_FREQUENCY;
+    for(int i=0; i<5; i++)
+      avg_arr[i] = -1;
+  }
 
   check_config_frequency_change();
   print_config();
@@ -142,7 +148,7 @@ void setup() {
       break;
   }
 
-  sensors = new Sensors(MIN_GAS_VALUE, MAX_GAS_VALUE);
+  sensors = new Sensors(MIN_GAS_VALUE, MAX_GAS_VALUE, avg_arr, &aqi_index);
   sensors->begin();
 
   sensors->start();

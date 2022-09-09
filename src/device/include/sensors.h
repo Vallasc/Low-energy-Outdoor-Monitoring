@@ -12,7 +12,7 @@
 
 class Sensors {
   public:
-    Sensors(float min_gas_value, float max_gas_value)
+    Sensors(float min_gas_value, float max_gas_value, float* _v, int* _aqi_index)
     {
       dht = new DHT(DHT_PIN, DHT_TYPE);
       dht->begin();
@@ -21,9 +21,8 @@ class Sensors {
 
       this->min_gas_value = min_gas_value;
       this->max_gas_value = max_gas_value;
-
-      for(int i=0; i<5; i++)
-        v[i] = -1;
+      this->aqi_index = _aqi_index;
+      this->v = _v;
     }
 
     ~Sensors()
@@ -46,11 +45,11 @@ class Sensors {
     
   private:
     DHT* dht;
-    int aqi_index = 0;
+    int* aqi_index;
     float min_gas_value;
     float max_gas_value;
-    float v[5];
-    int aqi = 2;
+    float* v;
+    int aqi = -1;
 
 };
 

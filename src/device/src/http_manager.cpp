@@ -17,7 +17,7 @@ bool HttpManager::begin(bool ping)
 int HttpManager::publish_sensors(float temp, float hum, float soil, float gas, int aqi, int wifi_rssi)
 {
   Serial.println("Publish sensors HTTP");
-  char payload[256];
+  char payload[512];
   snprintf(payload, sizeof(payload), 
     "{\"temp\": %2f, "
     "\"hum\": %2f, "
@@ -48,7 +48,7 @@ bool HttpManager::update_config(
       unsigned long http_mean_times)
 {
   // Send ping
-  char payload[256];
+  char payload[512];
   snprintf(payload, sizeof(payload),
                     "{\"id\": \"%s\", "
                       "\"token\": \"%s\", "
@@ -77,7 +77,7 @@ bool HttpManager::update_config(
 
 bool HttpManager::update_config()
 {
-  char payload[256];
+  char payload[512];
   snprintf(payload, sizeof(payload),
                         "{\"id\": \"%s\", "
                           "\"token\": \"%s\", "
