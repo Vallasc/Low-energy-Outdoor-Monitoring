@@ -54,12 +54,12 @@
     predictionTime = $selectedDevice.predictionTime
   }
 
-  function updateSampleFrequencyParams(){
-    let sampleEl = document.getElementById('range') as HTMLInputElement
-    sampleEl.min = '' + configUpdateFrequency
-    sampleEl.step = '' + configUpdateFrequency
-    sampleFrequency = sampleFrequency < configUpdateFrequency? configUpdateFrequency : sampleFrequency
-    sampleFrequency = sampleFrequency % configUpdateFrequency != 0? configUpdateFrequency : sampleFrequency
+  function updateConfigFrequencyParams(){
+    if(configUpdateFrequency > sampleFrequency)
+      configUpdateFrequency = 1
+
+    if(sampleFrequency % configUpdateFrequency != 0)
+      configUpdateFrequency = 1
   }
 
   async function init() {
@@ -151,20 +151,20 @@
             </td>
           </tr>
           <tr>
-            <th>Config update frequency</th>
-            <td><input class="form-control" bind:value={configUpdateFrequency}  type="number" step="1" min="1" max="60" on:change={updateSampleFrequencyParams}>minutes</td>
+            <th>Config update frequency (must be a divisor of {sampleFrequency})</th>
+            <td><input class="form-control" bind:value={configUpdateFrequency}  type="number" step="1" min="1" max="120" on:change={updateConfigFrequencyParams}>minutes</td>
           </tr>
           <tr>
             <th>Sample frequency</th>
-            <td><input id="range" class="form-control" bind:value={sampleFrequency}  type="number" step="{configUpdateFrequency}" min="{configUpdateFrequency}" max="120">minutes</td>
+            <td><input class="form-control" bind:value={sampleFrequency}  type="number" step="1" min="2" max="240" on:change={updateConfigFrequencyParams}>minutes</td>
           </tr>
           <tr>
             <th>Min gas value</th>
-            <td><input id="range" class="form-control" bind:value={minGasValue}  type="number" step="1" min="0" max="100"></td>
+            <td><input class="form-control" bind:value={minGasValue}  type="number" step="1" min="0" max="100"></td>
           </tr>
           <tr>
             <th>Max gas value</th>
-            <td><input id="range" class="form-control" bind:value={maxGasValue}  type="number" step="1" min="0" max="100"></td>
+            <td><input class="form-control" bind:value={maxGasValue}  type="number" step="1" min="0" max="100"></td>
           </tr>
         </tbody>
       </table>
@@ -255,16 +255,12 @@
           </thead>
           <tbody>
             <tr>
-              <th>Training set time</th>
-              <td><input id="range" class="form-control" bind:value={trainingTime}  type="number" step="1" min="1" max="5000">minutes</td>
+              <th>Training set time (0 = all time)</th>
+              <td><input id="range" class="form-control" bind:value={trainingTime}  type="number" step="1" min="0" max="5000">minutes</td>
             </tr>
             <tr>
               <th>Prediction time</th>
               <td><input id="range" class="form-control" bind:value={predictionTime}  type="number" step="1" min="1" max="5000">minutes</td>
-            </tr>
-            <tr>
-              <th> Mean Square Error (MSE)</th>
-              <td>0</td>
             </tr>
           </tbody>
         </table>
