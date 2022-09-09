@@ -186,7 +186,7 @@ services:
             - MONGO_HOST=mongo
             - MONGO_PORT=27017
             - API_KEY=${WEATHER_API_KERY}
-            - SLEEP_TIME=1800
+            - SLEEP_TIME=1200
         restart: always
         networks: 
             - internal
