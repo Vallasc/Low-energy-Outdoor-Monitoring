@@ -59,7 +59,7 @@ class HttpManager
     int port;
     char token[64];
     char id[64];
-    char packet[255];
+    char packet[512];
     double latitude;
     double longitude;
     bool perf_monitor;

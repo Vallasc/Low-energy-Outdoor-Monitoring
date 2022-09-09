@@ -47,9 +47,9 @@ float Sensors::get_gas()
 
 
 int Sensors::get_aqi()
-{    
-  v[aqi_index] = get_gas();
-  aqi_index = (aqi_index + 1) % 5;
+{
+  v[*aqi_index] = get_gas();
+  *aqi_index = (*aqi_index + 1) % 5;
 
   if(v[4] == -1.0)
     return aqi;
@@ -59,7 +59,7 @@ int Sensors::get_aqi()
 
   if(avg >= max_gas_value)
     aqi = 0;
-  if(min_gas_value <= avg && avg < max_gas_value)
+  else if(min_gas_value <= avg && avg < max_gas_value)
     aqi = 1;
   else
     aqi = 2;
