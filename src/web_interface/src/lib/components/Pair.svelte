@@ -1,8 +1,8 @@
 <script lang="ts">
   import Steps from "./Steps.svelte"
   import Map from "./Map.svelte"
-  import { showToast, initHost, pairDevice } from "../logic"
-  import type { Device } from "../types"
+  import { showToast, pairDevice } from "../logic"
+  import type { Device as DeviceType } from "../types"
 
   export let show = true
   let state = 0
@@ -11,14 +11,23 @@
   let password = ""
   let latitude = 0
   let longitude = 0
-
-  let address = ""
-  let deviceInit: Device
   let timeout
-  const RETRY_MSEC = 2000
+  let address = ""
+  let deviceInit: DeviceType
+  let configResponse: any = {}
+  let configuration: string
+
+  if (!navigator.geolocation) {
+    console.log('Geolocation is not supported by your browser')
+  } else {
+    console.log('Locating…')
+    navigator.geolocation.getCurrentPosition((position) => {
+      latitude = position.coords.latitude
+      longitude = position.coords.longitude
+    })
+  }
 
   function clear(){
-    clearTimeout(timeout)
     state = 0
     name = ""
     ssid = ""
@@ -29,46 +38,52 @@
   }
 
   async function next() {
-    if(state != 0) return
-    name = name.trim()
-    ssid = ssid.trim()
-    password = password.trim()
-    if (name == "" || ssid == "" || password == "") {
-      showToast("Device error", "Fill all the fields")
-      return;
-    }
-    try {
-      deviceInit = await pairDevice(name, latitude, longitude)
-      console.log(deviceInit)
-      state = 1
-      await initDevice()
-    } catch (e){
-      console.error(e)
+    switch(state) {
+      case 0:
+        if(state != 0) return
+        name = name.trim()
+        ssid = ssid.trim()
+        password = password.trim()
+        if (name == "" || ssid == "" || password == "") {
+          showToast("Device error", "Fill all the fields")
+          return;
+        }
+        try {
+          deviceInit = await pairDevice(name, latitude, longitude)
+          configuration = JSON.stringify(initDevice())
+          console.log(configuration)
+          state = 1
+        } catch (e){
+          console.error(e)
+        }
+        break
+      case 1:
+        state = 2
+        break;
     }
   }
 
-  async function initDevice() {
-    if (state != 1) return
-    console.log("Device initializing")
-    deviceInit.wifiSsid = ssid
-    deviceInit.wifiPassword = password
-    deviceInit.host = window.location.hostname
-    deviceInit.latitude = latitude
-    deviceInit.longitude = longitude
-    console.log(deviceInit)
-    try{
-      let res = await initHost(deviceInit)
-      console.log(res)
-      if(res){
-        state = 2
-        clearTimeout(timeout)
-      } else {
-        timeout = setTimeout(initDevice, RETRY_MSEC)
-      }
-    } catch (e){
-      console.error(e)
-      timeout = setTimeout(initDevice, RETRY_MSEC)
-    }
+  function initDevice() {
+    configResponse = {}
+    configResponse.id = deviceInit.id
+    configResponse.userId = deviceInit.userId
+    configResponse.name = deviceInit.name
+    configResponse.protocol = deviceInit.protocol
+    configResponse.sampleFrequency = deviceInit.sampleFrequency
+    configResponse.configUpdateFrequency = deviceInit.configUpdateFrequency
+    configResponse.minGasValue = deviceInit.minGasValue
+    configResponse.maxGasValue = deviceInit.maxGasValue
+    configResponse.proxyPort = deviceInit.proxyPort
+    configResponse.mqttPort = deviceInit.mqttPort
+    configResponse.udpPort = deviceInit.udpPort
+    configResponse.token = deviceInit.token
+    configResponse.enablePerformanceMonitoring = deviceInit.enablePerformanceMonitoring
+    configResponse.wifiSsid = ssid
+    configResponse.wifiPassword = password
+    configResponse.host = window.location.hostname
+    configResponse.latitude = latitude
+    configResponse.longitude = longitude
+    return configResponse
   }
 
   $: {
@@ -155,7 +170,6 @@
             <Map
               bind:latitude = {latitude}
               bind:longitude = {longitude}
-              autodetectPosition = {true}
               selectPosition = {true}
               isVisible = {show}
             ></Map>
@@ -164,16 +178,16 @@
       {:else if state == 1}
         <div class="modal-body">
           <div class="mb-3 mt-3">
-            <h3 class="text-danger">DO NOT RELOAD THIS PAGE!</h3>
-            <br />
             <ul class="list-group">
               <li class="list-group-item">
                 1. Press the pair button on the device
               </li>
               <li class="list-group-item">
                 2. Connect to network called LOMO_DEVICE
-                <span class="badge bg-primary rounded-pill"
-                  >Waiting <div class="spinner-border text-light" /></span>
+              </li>
+              <li class="list-group-item">
+                3. Open this <a href="http://192.168.1.10" target="_blank">page</a> and copy/paste the following configuration:
+                <input bind:value={configuration} readonly/>
               </li>
             </ul>
           </div>
@@ -185,31 +199,40 @@
             <div class="mb-3">You can now reconnect to your default network</div>
             <ul class="list-group">
               <li class="list-group-item">
-                Id: {deviceInit.id}
+                Id: {configResponse.id}
               </li>
               <li class="list-group-item">
-                Name: {deviceInit.name}
+                Name: {configResponse.name}
               </li>
               <li class="list-group-item">
-                Protocol: {deviceInit.protocol}
+                Wifi: {configResponse.wifiSsid}
               </li>
               <li class="list-group-item">
-                Server: {deviceInit.host}
+                Protocol: {configResponse.protocol}
               </li>
               <li class="list-group-item">
-                Sample frequency: {deviceInit.sampleFrequency} minutes
+                Server: {configResponse.host}
               </li>
               <li class="list-group-item">
-                Config frequency: {deviceInit.configUpdateFrequency} minutes
+                MQTT port: {configResponse.proxyPort}
               </li>
               <li class="list-group-item">
-                Wifi: {deviceInit.wifiSsid}
+                HTTP port: {configResponse.mqttPort}
               </li>
               <li class="list-group-item">
-                Min gas value: {deviceInit.minGasValue}
+                UDP port: {configResponse.udpPort}
               </li>
               <li class="list-group-item">
-                Max gas value: {deviceInit.maxGasValue}
+                Sample frequency: {configResponse.sampleFrequency} minutes
+              </li>
+              <li class="list-group-item">
+                Config frequency: {configResponse.configUpdateFrequency} minutes
+              </li>
+              <li class="list-group-item">
+                Min gas value: {configResponse.minGasValue}
+              </li>
+              <li class="list-group-item">
+                Max gas value: {configResponse.maxGasValue}
               </li>
             </ul>
           </div>
@@ -228,7 +251,6 @@
           <button 
             type="button" 
             class="btn btn-primary"
-            disabled = {state == 1}
             on:click={next}>
             Next
           </button>
@@ -242,12 +264,5 @@
   .show {
     display: block;
     background-color: #000000a6;
-  }
-  .badge {
-    margin-left: 5px;
-  }
-  .spinner-border {
-    width: 10px;
-    height: 10px;
   }
 </style>
