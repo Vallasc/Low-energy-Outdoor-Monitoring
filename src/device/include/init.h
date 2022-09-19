@@ -33,7 +33,6 @@ class InitServer
     void init();
     void stop();
     void handle_client();
-    void handle_options();
     bool is_inited()
     {
       return init_done;
@@ -45,6 +44,8 @@ class InitServer
     WebServer *server;
     bool init_done = false;
     void handle_post_init();
+    void handle_get();
+    void handle_options();
 };
 
 #endif

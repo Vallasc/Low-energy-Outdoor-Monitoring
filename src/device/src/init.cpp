@@ -8,6 +8,7 @@ void InitServer::init()
   this->server->enableCORS(true);
   this->server->begin();
   this->server->on("/init", HTTP_OPTIONS, std::bind(&InitServer::handle_options, this));
+  this->server->on("/", HTTP_GET, std::bind(&InitServer::handle_get, this));
   this->server->on("/init", HTTP_POST, std::bind(&InitServer::handle_post_init, this));
 
   Serial.println("WebServer setup: DONE");
@@ -23,15 +24,36 @@ void InitServer::handle_client()
   this->server->handleClient();
 }
 
+void InitServer::handle_get()
+{
+  Serial.println("Handle GET /");
+  char* html = "<html> \
+                <body> \
+                <h1>Device configuration</h1> \
+                <form action=\"/init\" method=\"post\" target=\"_top\"> \
+                Json config<br> \
+                <input type=\"text\" name=\"json\" required><br><br> \
+                <input type=\"submit\" value=\"Save\"> \
+                </form> \
+                </body> \
+                </html>";
+  server->send(200, "text/html", html);
+}
+
 void InitServer::handle_post_init()
 {
   Serial.println("Handle init");
-  if (server->hasArg("plain")) {
-    String plain = server->arg("plain");
+  if (server->hasArg("json")) {
+    String plain = server->arg("json");
     init_from_json(plain);
     init_done = true;
   }
-  server->send(200, "application/json", "");
+    char* html = "<html> \
+                <body> \
+                <h1>Device initialized</h1> \
+                </body> \
+                </html>";
+  server->send(200, "text/html", html);
   stop();
 }
 
