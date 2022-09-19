@@ -55,6 +55,7 @@ class HttpProxyWorker:
             token = bearer.split()[1]
 
             payload = json.loads(request.data.decode("utf-8"))
+            print(payload)
             device_user = self._mongo_client.get_device_user_token(id, token)
             if device_user is None:
                 return "unauthorized", 401

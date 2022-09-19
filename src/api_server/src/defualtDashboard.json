@@ -180,6 +180,15 @@
           "hide": false,
           "query": "from(bucket: \"lomo\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"id\"] == \"${deviceId}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"forecasted_temp\")",
           "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "name": "InfluxDB"
+          },
+          "hide": false,
+          "query": "from(bucket: \"lomo\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"id\"] == \"${deviceId}\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"out_temp\")",
+          "refId": "C"
         }
       ],
       "title": "Temperature",

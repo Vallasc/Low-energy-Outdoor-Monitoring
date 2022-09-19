@@ -5,9 +5,9 @@ const PROD = import.meta.env.PROD
 if(PROD)
   var LOMO_HOST = ''
 else
-  var LOMO_HOST = 'http://localhost:8888'
+  var LOMO_HOST = 'http://10.147.17.17:8888'
 
-const DEVICE_HOST = "http://192.168.1.10:80"
+const DEVICE_HOST = "http://192.168.1.10"
 
 let token: string | null = null;
 jwtToken.subscribe(value => {
@@ -187,16 +187,4 @@ export async function deleteDevice(deviceId: string): Promise<boolean | null> {
     showToast("Command status", "Something went wrong")
   }
   return Promise.resolve(false)
-}
-
-export async function initHost(deviceInit: Device): Promise<boolean> {
-  const response = await fetch(DEVICE_HOST + "/init", {
-    method: "POST",
-    cache: 'no-cache',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(deviceInit)
-  })
-  return response.status == 200
 }

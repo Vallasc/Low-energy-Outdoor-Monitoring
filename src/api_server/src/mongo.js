@@ -93,7 +93,7 @@ export class MongoManager {
       {
         $set: {
             "devices.$.protocol": device.protocol,
-            "devices.$.sampleFrequency": device.configUpdateFrequency,
+            "devices.$.configUpdateFrequency": device.configUpdateFrequency,
             "devices.$.sampleFrequency": device.sampleFrequency,
             "devices.$.minGasValue": device.minGasValue,
             "devices.$.dashboardUid": device.dashboardUid,

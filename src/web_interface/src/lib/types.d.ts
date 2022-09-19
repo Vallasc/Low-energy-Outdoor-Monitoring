@@ -20,6 +20,7 @@ interface Device {
     lastSeen?: number
     proxyPort?: number
     mqttPort?: number
+    udpPort?: number
     host?: string
     wifiSsid?: string
     wifiPassword?: string
