@@ -1,5 +1,5 @@
 influxdb_client==1.30.0
 pandas==1.4.4
-prophet==1.1
+prophet==1.1.1
 pymongo==4.2.0
 scikit-learn==1.1.2

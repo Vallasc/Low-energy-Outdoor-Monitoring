@@ -16,9 +16,10 @@
   let enableMonitoring = false
   let enableAlert = false
   let enablePrediction = false
-  let grafanaHost = window.location.protocol + "//" + window.location.hostname + ":3333"
   let trainingTime = 10
   let predictionTime = 10
+
+  let grafanaHost = "http://" + window.location.hostname + ":3333"
 
   async function saveButton() {
     await putDevice(deviceId, {

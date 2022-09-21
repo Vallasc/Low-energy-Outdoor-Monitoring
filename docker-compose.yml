@@ -54,6 +54,8 @@ services:
             - GF_AUTH_ANONYMOUS_ENABLED=true
             - GF_SECURITY_ALLOW_EMBEDDING=true
             - GF_SECURITY_COOKIE_SAMESITE=false
+            - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s:%(http_port)s/grafana/
+            - GF_SERVER_SERVE_FROM_SUB_PATH=true
 
         healthcheck:
             test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
@@ -207,6 +209,7 @@ services:
             - MONGO_DB_NAME=${MONGO_DB_NAME}
             - MONGO_HOST=mongo
             - MONGO_PORT=27017
+            - SLEEP_TIME=30
         restart: always
         networks: 
             - internal

@@ -54,14 +54,14 @@ def handle_start(message):
             bot.send_message(message.chat.id, "Hello " + user['_id'])
             bot.send_message(message.chat.id, "You can list your devices using /list command")
         else:
-            bot.send_message(message.chat.id, "I'm a the LOMO bot, I can hep you to mange your devices!\n Go to the telegram section of LOMO webapp")
+            bot.send_message(message.chat.id, "I'm a the LOMO bot, I can help you to manage your devices!\n Go to the telegram section of LOMO webapp")
 
 @bot.message_handler(commands=['stop'])
 def handle_stop(message):
     if message.content_type == 'text':
         args = message.text.split()
         mongo_client.delete_telegram_user(message.chat.id)
-        bot.send_message(message.chat.id, "User disconected")
+        bot.send_message(message.chat.id, "User disconnected")
 
 @bot.message_handler(commands=['list'])
 def handle_list(message):
@@ -109,7 +109,7 @@ def handle_show(message):
                 msg += "- RSSI: " + str(devices[i]['lastRssiValue'])
                 bot.send_message(message.chat.id, msg)
                 return
-        bot.send_message(message.chat.id, "Usage /select <DEVICE_NUMBER>")
+        bot.send_message(message.chat.id, "Usage /show <DEVICE_NUMBER>")
 
 @bot.message_handler(commands=['enablereport'])
 def handle_show(message):
