@@ -20,9 +20,9 @@
     }
     let iframe: any = document.getElementById("dashboard-iframe")
     if(window.location.protocol === "https:")
-      iframe.src = url + $selectedDevice.dashboardUrl + "?orgId=1&refresh=5s&theme=light&kiosk"
+      iframe.src = url + $selectedDevice.dashboardUrl + "?orgId=1&refresh=5s&theme=light&kiosk=tv"
     else
-      iframe.src = url + ":3333" + $selectedDevice.dashboardUrl + "?orgId=1&refresh=5s&theme=light&kiosk"
+      iframe.src = url + ":3333" + $selectedDevice.dashboardUrl + "?orgId=1&refresh=5s&theme=light&kiosk=tv"
     console.log(iframe.src)
   }
 
