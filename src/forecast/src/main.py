@@ -51,10 +51,10 @@ def calc_forecasting(device, field, start_time, stop_time):
     m = Prophet(
         yearly_seasonality=False,
         weekly_seasonality=False,
-        daily_seasonality=20, # 20
-        n_changepoints=50, # 30
-        changepoint_range=0.8, # 0.8
-        changepoint_prior_scale=0.5, # 0.5
+        daily_seasonality=30,
+        n_changepoints=35,
+        changepoint_range=1,
+        changepoint_prior_scale=0.01
         # interval_width=1.0
     )
     m.fit(df)
