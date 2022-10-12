@@ -1,3 +1,4 @@
+// Default device configuration
 export const MIN_GAS_VALUE = process.env.MIN_GAS_VALUE || 10
 export const MAX_GAS_VALUE = process.env.MAX_GAS_VALUE || 70
 export const SAMPLE_FREQUENCY = process.env.SAMPLE_FREQUENCY || 2

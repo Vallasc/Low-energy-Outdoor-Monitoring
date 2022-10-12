@@ -72,16 +72,6 @@ export async function deleteFolder(folderUid) {
 }
 
 export async function createDashboard(userId, folderUid, deviceId) {
-  // const dashboard = {
-  //   id: null,
-  //   uid: null,
-  //   title: "Production Overview",
-  //   tags: [],
-  //   timezone: "browser",
-  //   schemaVersion: 16,
-  //   version: 0,
-  //   refresh: "25s"
-  // }
   let dashboard = JSON.parse(
                     JSON.stringify(defaultDashboard)
                         .replaceAll("${deviceId}", deviceId))

@@ -16,6 +16,7 @@ logging.basicConfig(
     level=logging.INFO
 )
 
+# Influx credentials
 INFLUXDB_HOST = os.getenv("INFLUX_HOST", "localhost")
 INFLUXDB_PORT = os.getenv("INFLUXDB_PORT", "8086")
 INFLUXDB_ORG = os.getenv("INFLUXDB_ORG", "lomo")
@@ -28,6 +29,7 @@ FIELDS = [ 'temp', 'gas', 'hum', 'soil']
 mongo_client = MongoClient()
 client = InfluxDBClient(url="http://"+INFLUXDB_HOST+":"+INFLUXDB_PORT, token=INFLUXDB_TOKEN, org=INFLUXDB_ORG)
 
+# Convert query result into a dataframe
 def result_to_dataframe(result):
     raw = []
     for table in result:
@@ -35,7 +37,7 @@ def result_to_dataframe(result):
             raw.append((record.get_value(), record.get_time()))
     return pd.DataFrame(raw, columns=['y','ds'], index=None)
 
-
+# Calculate forecasting of a specific device and field
 def calc_forecasting(device, field, start_time, stop_time):
     query = 'from(bucket: "' + INFLUXDB_BUCKET + '")' \
         ' |> range(start:' +  start_time + ', stop:' + stop_time + ')'\
@@ -69,6 +71,7 @@ def calc_forecasting(device, field, start_time, stop_time):
                                     + ' ' + str(int(time.mktime(forecast['ds'][d].timetuple()))) + "000000000" for d in range(len(forecast))]
     write_client = client.write_api(write_options=WriteOptions(batch_size=1000, flush_interval=10_000,
                                                             jitter_interval=2_000, retry_interval=5_000, write_type=WriteType.synchronous))
+    # Write data on influx
     write_client.write(INFLUXDB_BUCKET, INFLUXDB_ORG, lines)
     write_client.__del__()
 
@@ -81,14 +84,14 @@ if __name__ == '__main__':
                     logging.info('Processing device ' + str(device['id']))
                     for field in FIELDS:
                         logging.info('Field ' + field)
-                        # try:
-                        now = datetime.datetime.now()
-                        START_TIME = '-5y'
-                        if device['trainingTime'] > 0:
-                            START_TIME = (now - datetime.timedelta(minutes=device['trainingTime'])).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-                        STOP_TIME = now.strftime("%Y-%m-%dT%H:%M:%S.%fZ") 
-                        
-                        calc_forecasting(device, field, START_TIME, STOP_TIME)
-                        # except Exception:
-                        #      logging.error("Error processing " + str(device['id']))
+                        try:
+                            now = datetime.datetime.now()
+                            START_TIME = '-5y'
+                            if device['trainingTime'] > 0:
+                                START_TIME = (now - datetime.timedelta(minutes=device['trainingTime'])).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+                            STOP_TIME = now.strftime("%Y-%m-%dT%H:%M:%S.%fZ") 
+                            
+                            calc_forecasting(device, field, START_TIME, STOP_TIME)
+                        except Exception:
+                            logging.error("Error processing " + str(device['id']))
         time.sleep(SLEEP_TIME)

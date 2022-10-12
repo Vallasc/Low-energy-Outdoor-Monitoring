@@ -45,12 +45,6 @@ const __dirname = path.resolve();
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-// app.use(function setCommonHeaders(req, res, next) {
-//   res.set("Access-Control-Allow-Private-Network", "true");
-//   next();
-// });
-// // app.use(cors())
-
 app.use(express.static(path.join(__dirname, './public')))
 
 let mongoManager
@@ -68,6 +62,7 @@ const routes = ["/", "/dashboard", "/signin", "/signup", "/signout", "/profile",
 routes.forEach(route => app.get(route, handler))
 
 
+// User creation
 app.post('/users', async (req, res) => {
   const salt = crypto.randomBytes(20).toString('hex')
   const hash = crypto.createHash('sha256')
@@ -103,6 +98,7 @@ app.post('/users', async (req, res) => {
   }
 })
 
+// Telegram bot login
 app.get('/users/api/telegram', async (req, res) => {
   try {
     if(req.query.telegramToken && req.query.userId) {
@@ -125,6 +121,7 @@ app.get('/users/api/telegram', async (req, res) => {
   }
 })
 
+// Get user info
 app.get('/users/me', async (req, res) => {
   try {
     let user = await verifyToken(req)
@@ -140,6 +137,7 @@ app.get('/users/me', async (req, res) => {
   }
 })
 
+// Update user info
 app.put('/users/me', async (req, res) => {
   const doc = await mongoManager.findUserById(req.body.email)
   if(!doc.email || !doc.password || !doc.salt){
@@ -162,6 +160,7 @@ app.put('/users/me', async (req, res) => {
   res.status(200).send()
 })
 
+// Delete user
 app.delete('/users/me', async (req, res) => {
   const doc = await mongoManager.findUserById(req.body.email)
   if(!doc.email || !doc.password || !doc.salt){
@@ -189,6 +188,7 @@ app.delete('/users/me', async (req, res) => {
   }
 })
 
+// User authentication
 app.post('/auth', async (req, res) => {
   try {
     const doc = await mongoManager.findUserById(req.body.email)
@@ -216,6 +216,7 @@ app.post('/auth', async (req, res) => {
   }
 })
 
+// JWT token refresh
 app.put('/auth/refresh', async (req, res) => {
   try {
     const user = await verifyToken(req)
@@ -245,6 +246,7 @@ async function verifyToken(req){
   }
 }
 
+// Create device
 app.post('/devices', async (req, res) => {
   try {
     const user = await verifyToken(req)
@@ -303,6 +305,7 @@ app.post('/devices', async (req, res) => {
   }
 })
 
+// Update device
 app.put('/devices/:id', async (req, res) => {
   try {
     const user = await verifyToken(req)
@@ -349,6 +352,7 @@ app.put('/devices/:id', async (req, res) => {
   }
 })
 
+// Delete device
 app.delete('/devices/:id', async (req, res) => {
   try {
     const user = await verifyToken(req)
@@ -372,14 +376,12 @@ app.delete('/devices/:id', async (req, res) => {
   }
 })
 
+// Called by grafana to send alerts
 app.post('/alerts', async (req, res) => {
   try {
     for(let alert of req.body.alerts){
       console.log("New alert of device: " + alert.labels.deviceId)
       const deviceId = alert.labels.deviceId
-      // TODO mettere device name
-      // console.log(alert)
-      // console.log(deviceId)
       const userId = await mongoManager.findUserIdByDeviceId(deviceId)
       const secondsSinceEpoch = Math.round(Date.now() / 1000)
       const user = await mongoManager.findUserById(userId)
