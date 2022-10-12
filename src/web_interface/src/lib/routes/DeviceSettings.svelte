@@ -209,7 +209,7 @@
       <div class="form-check">
         <input class="form-check-input" type="checkbox" value="" id="check-perf" bind:checked = {enableAlert}>
         <label class="form-check-label" for="check-perf">
-          Enable alerting messages when AQI >= 2
+          Enable alerting messages when AQI >= 1
         </label>
       </div>
       {#if enableAlert}
@@ -229,7 +229,7 @@
                 <td>None</td>
               {/if}
               {#if $selectedDevice.lastAlertTime > 0 }
-                <td>AQI value = 2</td>
+                <td>AQI value >= 1</td>
               {:else}
                 <td>None</td>
               {/if}

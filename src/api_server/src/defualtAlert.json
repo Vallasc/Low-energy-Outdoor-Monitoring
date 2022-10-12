@@ -34,7 +34,7 @@
           {
             "evaluator": {
               "params": [
-                1
+                0
               ],
               "type": "gt"
             },

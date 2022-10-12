@@ -390,7 +390,7 @@ app.post('/alerts', async (req, res) => {
       })
       await axios.post("http://" + TELEGRAM_HOST + "/users/" + userId + "/messages", {
         telegramToken: user.telegramToken,
-        message: "Alert fired for device " + deviceId + "\n AQI >= 2"
+        message: "Alert fired for device " + deviceId + "\n AQI >= 1"
       })
     }
     res.status(200).send()
