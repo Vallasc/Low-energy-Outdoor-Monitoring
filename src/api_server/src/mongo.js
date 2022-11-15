@@ -96,6 +96,7 @@ export class MongoManager {
             "devices.$.configUpdateFrequency": device.configUpdateFrequency,
             "devices.$.sampleFrequency": device.sampleFrequency,
             "devices.$.minGasValue": device.minGasValue,
+            "devices.$.maxGasValue": device.maxGasValue,
             "devices.$.dashboardUid": device.dashboardUid,
             "devices.$.dashboardUrl": device.dashboardUrl,
             "devices.$.enablePerformanceMonitoring": device.enablePerformanceMonitoring,
